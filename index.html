@@ -7,20 +7,13 @@
     <style>
         :root { --bank-blue: #003366; --bank-gold: #c5a059; --bg: #f0f2f5; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 110px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; }
 
-        /* Navigation - Raised higher to avoid system buttons */
+        /* Navigation - Floating for Mobile Safety */
         .bottom-nav { 
-            position: fixed; 
-            bottom: 20px; /* Raised from the very bottom */
-            left: 5%;
-            width: 90%; 
-            background: white; 
-            display: flex; 
-            border-radius: 20px;
-            height: 65px; 
-            z-index: 1000; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+            position: fixed; bottom: 25px; left: 5%; width: 90%; 
+            background: white; display: flex; border-radius: 20px;
+            height: 65px; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
             border: 1px solid #ddd;
         }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; border: none; background: none; }
@@ -44,8 +37,9 @@
         .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-action { padding: 6px 10px; border-radius: 5px; font-size: 14px; border: 1px solid #ddd; background: white; margin-right: 5px; }
         
-        .label { font-size: 11px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
-        .flex-row { display: flex; gap: 10px; align-items: center; }
+        .label { font-size: 10px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
+        .flex-row { display: flex; gap: 8px; }
+        .meta-text { font-size: 12px; color: #555; margin: 2px 0; }
     </style>
 </head>
 <body>
@@ -54,12 +48,12 @@
         <h3 style="margin:0 0 10px 0;">Daily Task Log</h3>
         
         <div class="card" style="background: #fff9c4;">
-            <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">+ Quick Add Task</div>
+            <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">+ Quick Manual Add</div>
             <input type="date" id="globalDate" class="input-box">
-            <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name / Task">
+            <input type="text" id="manualTitle" class="input-box" placeholder="Task or Name">
             <div class="flex-row">
-                <input type="text" id="manualAssign" class="input-box" placeholder="Staff..." list="staffList" style="margin-bottom:0">
-                <button class="btn-primary" style="width:100px; padding:10px" onclick="addManualTask()">Add</button>
+                <input type="text" id="manualAssign" class="input-box" placeholder="Assign to..." list="staffList" style="margin-bottom:0">
+                <button class="btn-primary" style="width:80px; padding:10px" onclick="addManualTask()">Add</button>
             </div>
         </div>
 
@@ -69,22 +63,31 @@
     <div id="parsePage" class="page">
         <h3 id="parseTitle">Lens Parser</h3>
         <div class="card" id="parserInputArea">
-            <textarea id="rawInput" class="input-box" style="height: 80px;" placeholder="Paste Lens text here..."></textarea>
-            <button class="btn-primary" onclick="intelligentParse()">Parse & Extract</button>
+            <p style="font-size:12px; color:#666; margin-top:0">Format: [CustID] [Acc] [Name] [Mobile]</p>
+            <textarea id="rawInput" class="input-box" style="height: 100px;" placeholder="Paste text here..."></textarea>
+            <button class="btn-primary" onclick="intelligentParse()">Process Text</button>
         </div>
 
         <div id="editArea" class="card" style="display:none; background: #e3f2fd;">
             <input type="hidden" id="editTaskId">
-            <label class="label">Name</label>
+            
+            <label class="label">Customer ID</label>
+            <input type="text" id="editCustId" class="input-box">
+
+            <label class="label">Account Number</label>
+            <input type="text" id="editAcc" class="input-box">
+
+            <label class="label">Customer Name</label>
             <input type="text" id="editName" class="input-box">
+
             <div class="flex-row">
-                <div style="flex:1"><label class="label">A/c</label><input type="text" id="editAcc" class="input-box"></div>
-                <div style="flex:1"><label class="label">Phone</label><input type="text" id="editPhone" class="input-box"></div>
+                <div style="flex:1"><label class="label">Mobile</label><input type="text" id="editPhone" class="input-box"></div>
+                <div style="flex:1"><label class="label">Assigned To</label><input type="text" id="editAssign" class="input-box" list="staffList"></div>
             </div>
-            <label class="label">Assign To</label>
-            <input type="text" id="editAssign" class="input-box" list="staffList">
+
             <label class="label">Remarks</label>
             <input type="text" id="editRemarks" class="input-box">
+
             <button class="btn-primary" style="background:var(--bank-gold)" id="saveBtn" onclick="commitTask()">Save Task</button>
             <button class="btn-primary" style="background:#888; margin-top:5px;" onclick="cancelEdit()">Cancel</button>
         </div>
@@ -104,14 +107,14 @@
     </nav>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v3')) || [];
+    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v4')) || [];
 
     function switchPage(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
-        if(id === 'taskPage') cancelEdit(); // Reset parser when going to task page
+        if(id === 'taskPage') cancelEdit();
         renderTasks();
     }
 
@@ -119,25 +122,45 @@
         const date = document.getElementById('globalDate').value;
         const title = document.getElementById('manualTitle').value;
         if(!date || !title) return alert("Enter Date and Title");
-        const task = { id: Date.now(), date: date, name: title, acc: "Manual", phone: "", assigned: document.getElementById('manualAssign').value || "Self", remarks: "Manual", done: false };
+        const task = { id: Date.now(), date: date, name: title, custId: "Manual", acc: "", phone: "", assigned: document.getElementById('manualAssign').value || "Self", remarks: "", done: false };
         db.push(task);
         saveAndRender();
         document.getElementById('manualTitle').value = "";
     }
 
+    // UPDATED PARSING LOGIC
     function intelligentParse() {
-        const raw = document.getElementById('rawInput').value;
+        const raw = document.getElementById('rawInput').value.trim();
         if(!raw) return;
-        const acc = (raw.match(/\b\d{14}\b/) || [""])[0];
-        const phone = (raw.match(/\b\d{10}\b/) || [""])[0];
-        let nameClean = raw.replace(/[0-9]/g, '').replace(/[^\w\s]/gi, '').trim();
-        const name = nameClean.split(/\s+/).slice(0, 2).join(' ') || "New Task";
+
+        // Split by space
+        const parts = raw.split(/\s+/);
         
+        // Logical extraction based on your new style:
+        // [0] Customer ID, [1] Acc Number, [Remaining] Name, [Last] Mobile
+        const custId = parts[0] || "";
+        const acc = parts[1] || "";
+        
+        let phone = "";
+        let nameParts = [];
+
+        // If there are at least 4 parts, assume the last one is the phone number
+        if (parts.length >= 4) {
+            phone = parts[parts.length - 1];
+            nameParts = parts.slice(2, parts.length - 1);
+        } else if (parts.length === 3) {
+            nameParts = [parts[2]];
+        }
+
+        const name = nameParts.join(' ');
+
         document.getElementById('editTaskId').value = "";
-        document.getElementById('editName').value = name;
+        document.getElementById('editCustId').value = custId;
         document.getElementById('editAcc').value = acc;
+        document.getElementById('editName').value = name;
         document.getElementById('editPhone').value = phone;
-        document.getElementById('editRemarks').value = raw.substring(0, 50);
+        document.getElementById('editRemarks').value = "";
+        
         document.getElementById('editArea').style.display = 'block';
     }
 
@@ -150,6 +173,7 @@
         document.getElementById('editArea').style.display = 'block';
         
         document.getElementById('editTaskId').value = t.id;
+        document.getElementById('editCustId').value = t.custId || "";
         document.getElementById('editName').value = t.name;
         document.getElementById('editAcc').value = t.acc;
         document.getElementById('editPhone').value = t.phone;
@@ -172,6 +196,7 @@
         const id = document.getElementById('editTaskId').value;
 
         const taskData = {
+            custId: document.getElementById('editCustId').value,
             name: document.getElementById('editName').value,
             acc: document.getElementById('editAcc').value,
             phone: document.getElementById('editPhone').value,
@@ -181,10 +206,8 @@
         };
 
         if(id) {
-            // Update existing
             db = db.map(t => t.id == id ? {...t, ...taskData} : t);
         } else {
-            // Create new
             db.push({ id: Date.now(), ...taskData, done: false });
         }
 
@@ -208,7 +231,7 @@
     }
 
     function saveAndRender() {
-        localStorage.setItem('bank_pro_tasks_v3', JSON.stringify(db));
+        localStorage.setItem('bank_pro_tasks_v4', JSON.stringify(db));
         renderTasks();
     }
 
@@ -231,12 +254,13 @@
                 <div style="display:none">
                     ${grouped[date].map(t => `
                         <div class="task-item ${t.done ? 'done' : ''}">
-                            <div style="font-weight:bold">${t.name}</div>
-                            <div style="font-size:12px; color:#666">Assign: ${t.assigned} | ${t.acc}</div>
+                            <div style="font-weight:bold; color:var(--bank-blue)">${t.name}</div>
+                            <div class="meta-text">ID: ${t.custId} | Acc: ${t.acc}</div>
+                            <div class="meta-text">Mob: ${t.phone} | Staff: <strong>${t.assigned}</strong></div>
                             <div style="margin-top:10px; display:flex;">
                                 <button class="btn-action" onclick="toggleTask(${t.id})">${t.done ? '✅' : '⏳'}</button>
-                                <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
-                                <button class="btn-action" onclick="rescheduleTask(${t.id})">🕒 Move</button>
+                                <button class="btn-action" onclick="editTask(${t.id})">✏️</button>
+                                <button class="btn-action" onclick="rescheduleTask(${t.id})">🕒</button>
                                 <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
                             </div>
                         </div>
