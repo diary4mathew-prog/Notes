@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bank Task Manager Pro</title>
+    <style>
+        :root { --bank-blue: #003366; --bank-gold: #c5a059; --bg: #f0f2f5; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 65px; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; border: none; background: none; }
+        .nav-item.active { color: var(--bank-blue); font-weight: bold; }
+        .nav-icon { font-size: 20px; margin-bottom: 4px; }
+
+        /* General UI */
+        .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; border: 1px solid #e0e0e0; }
+        .input-box { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-size: 16px; margin-bottom: 10px; font-family: inherit; }
+        
+        /* Task List */
+        .date-header { background: #e9ecef; padding: 12px 15px; font-weight: bold; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; cursor: pointer; }
+        .task-item { border-left: 4px solid var(--bank-blue); padding: 12px; margin: 8px 0; background: #fdfdfd; border-radius: 4px; position: relative; }
+        .task-item.done { border-left-color: #27ae60; opacity: 0.7; }
+        
+        /* Buttons */
+        .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-action { padding: 4px 8px; border-radius: 5px; font-size: 11px; border: 1px solid #ddd; background: white; margin-left: 5px; }
+        
+        .label { font-size: 11px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
+        .flex-row { display: flex; gap: 10px; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div id="taskPage" class="page active">
+        <h3 style="margin:0 0 10px 0;">Daily Tasks</h3>
+        
+        <div class="card" style="background: #fff9c4; border: 1px solid #fbc02d;">
+            <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">+ Quick Add Task</div>
+            <input type="date" id="globalDate" class="input-box">
+            <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name / Task Title">
+            <div class="flex-row">
+                <input type="text" id="manualAssign" class="input-box" placeholder="Assign to..." list="staffList" style="margin-bottom:0">
+                <button class="btn-primary" style="width:100px; padding:10px" onclick="addManualTask()">Add</button>
+            </div>
+        </div>
+
+        <div id="taskContainer"></div>
+    </div>
+
+    <div id="parsePage" class="page">
+        <h3>Lens Parser</h3>
+        <div class="card">
+            <textarea id="rawInput" class="input-box" style="height: 80px;" placeholder="Paste Lens text here..."></textarea>
+            <button class="btn-primary" onclick="intelligentParse()">Parse & Extract</button>
+        </div>
+
+        <div id="editArea" class="card" style="display:none; background: #e3f2fd;">
+            <label class="label">Name</label>
+            <input type="text" id="editName" class="input-box">
+            <div class="flex-row">
+                <div style="flex:1"><label class="label">A/c</label><input type="text" id="editAcc" class="input-box"></div>
+                <div style="flex:1"><label class="label">Phone</label><input type="text" id="editPhone" class="input-box"></div>
+            </div>
+            <label class="label">Assign To</label>
+            <input type="text" id="editAssign" class="input-box" list="staffList">
+            <label class="label">Remarks</label>
+            <input type="text" id="editRemarks" class="input-box">
+            <button class="btn-primary" style="background:var(--bank-gold)" onclick="commitTask()">Save Extracted Task</button>
+        </div>
+    </div>
+
+    <datalist id="staffList">
+        <option value="Manager">
+        <option value="Asst Manager">
+        <option value="Clerk">
+        <option value="Cashier">
+    </datalist>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchPage('taskPage', this)">
+            <span class="nav-icon">📋</span><span>Daily Tasks</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('parsePage', this)">
+            <span class="nav-icon">🔍</span><span>Lens Parser</span>
+        </button>
+    </nav>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v2')) || [];
+
+    function switchPage(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+        renderTasks();
+    }
+
+    // MANUAL ADD LOGIC
+    function addManualTask() {
+        const date = document.getElementById('globalDate').value;
+        const title = document.getElementById('manualTitle').value;
+        const assign = document.getElementById('manualAssign').value;
+        
+        if(!date || !title) return alert("Enter Date and Title");
+
+        const task = {
+            id: Date.now(),
+            date: date,
+            name: title,
+            acc: "Manual",
+            phone: "",
+            assigned: assign || "Self",
+            remarks: "Manually entered",
+            done: false
+        };
+
+        db.push(task);
+        saveAndRender();
+        document.getElementById('manualTitle').value = "";
+    }
+
+    // PARSER LOGIC
+    function intelligentParse() {
+        const raw = document.getElementById('rawInput').value;
+        if(!raw) return;
+        const acc = (raw.match(/\b\d{14}\b/) || [""])[0];
+        const phone = (raw.match(/\b\d{10}\b/) || [""])[0];
+        let nameClean = raw.replace(/[0-9]/g, '').replace(/[^\w\s]/gi, '').trim();
+        const name = nameClean.split(/\s+/).slice(0, 2).join(' ') || "New Task";
+        
+        document.getElementById('editName').value = name;
+        document.getElementById('editAcc').value = acc;
+        document.getElementById('editPhone').value = phone;
+        document.getElementById('editRemarks').value = raw.substring(0, 50);
+        document.getElementById('editArea').style.display = 'block';
+    }
+
+    function commitTask() {
+        const date = document.getElementById('globalDate').value;
+        const task = {
+            id: Date.now(),
+            date: date,
+            name: document.getElementById('editName').value,
+            acc: document.getElementById('editAcc').value,
+            phone: document.getElementById('editPhone').value,
+            assigned: document.getElementById('editAssign').value || "Unassigned",
+            remarks: document.getElementById('editRemarks').value,
+            done: false
+        };
+        db.push(task);
+        saveAndRender();
+        document.getElementById('editArea').style.display = 'none';
+        document.getElementById('rawInput').value = "";
+        switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
+    }
+
+    function toggleTask(id) {
+        db = db.map(t => t.id === id ? {...t, done: !t.done} : t);
+        saveAndRender();
+    }
+
+    function rescheduleTask(id) {
+        const newDate = prompt("Enter new date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+        if(newDate) {
+            db = db.map(t => t.id === id ? {...t, date: newDate} : t);
+            saveAndRender();
+        }
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('bank_pro_tasks_v2', JSON.stringify(db));
+        renderTasks();
+    }
+
+    function renderTasks() {
+        const container = document.getElementById('taskContainer');
+        container.innerHTML = "";
+        const grouped = db.reduce((acc, t) => {
+            acc[t.date] = acc[t.date] || [];
+            acc[t.date].push(t);
+            return acc;
+        }, {});
+
+        Object.keys(grouped).sort().reverse().forEach(date => {
+            const block = document.createElement('div');
+            block.innerHTML = `
+                <div class="date-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                    <span>📅 ${date}</span>
+                    <span style="font-size:12px;">${grouped[date].length} Tasks</span>
+                </div>
+                <div style="display:none">
+                    ${grouped[date].map(t => `
+                        <div class="task-item ${t.done ? 'done' : ''}">
+                            <div style="font-weight:bold">${t.name}</div>
+                            <div style="font-size:12px; color:#666">Assign: ${t.assigned} | ${t.acc}</div>
+                            <div style="margin-top:8px;">
+                                <button class="btn-action" onclick="toggleTask(${t.id})">${t.done ? '✅' : '⏳'}</button>
+                                <button class="btn-action" onclick="rescheduleTask(${t.id})">🕒 Move</button>
+                                <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(block);
+        });
+    }
+
+    function deleteTask(id) {
+        if(confirm("Delete this task?")) {
+            db = db.filter(t => t.id !== id);
+            saveAndRender();
+        }
+    }
+
+    document.getElementById('globalDate').valueAsDate = new Date();
+    renderTasks();
+</script>
+</body>
+</html>
