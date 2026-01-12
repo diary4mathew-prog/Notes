@@ -7,10 +7,22 @@
     <style>
         :root { --bank-blue: #003366; --bank-gold: #c5a059; --bg: #f0f2f5; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 110px; }
 
-        /* Navigation */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 65px; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        /* Navigation - Raised higher to avoid system buttons */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 20px; /* Raised from the very bottom */
+            left: 5%;
+            width: 90%; 
+            background: white; 
+            display: flex; 
+            border-radius: 20px;
+            height: 65px; 
+            z-index: 1000; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+            border: 1px solid #ddd;
+        }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; border: none; background: none; }
         .nav-item.active { color: var(--bank-blue); font-weight: bold; }
         .nav-icon { font-size: 20px; margin-bottom: 4px; }
@@ -21,7 +33,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; border: 1px solid #e0e0e0; }
-        .input-box { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-size: 16px; margin-bottom: 10px; font-family: inherit; }
+        .input-box { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 16px; margin-bottom: 10px; font-family: inherit; }
         
         /* Task List */
         .date-header { background: #e9ecef; padding: 12px 15px; font-weight: bold; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; cursor: pointer; }
@@ -30,7 +42,7 @@
         
         /* Buttons */
         .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-action { padding: 4px 8px; border-radius: 5px; font-size: 11px; border: 1px solid #ddd; background: white; margin-left: 5px; }
+        .btn-action { padding: 6px 10px; border-radius: 5px; font-size: 14px; border: 1px solid #ddd; background: white; margin-right: 5px; }
         
         .label { font-size: 11px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
         .flex-row { display: flex; gap: 10px; align-items: center; }
@@ -39,14 +51,14 @@
 <body>
 
     <div id="taskPage" class="page active">
-        <h3 style="margin:0 0 10px 0;">Daily Tasks</h3>
+        <h3 style="margin:0 0 10px 0;">Daily Task Log</h3>
         
-        <div class="card" style="background: #fff9c4; border: 1px solid #fbc02d;">
+        <div class="card" style="background: #fff9c4;">
             <div style="font-weight:bold; font-size:13px; margin-bottom:8px;">+ Quick Add Task</div>
             <input type="date" id="globalDate" class="input-box">
-            <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name / Task Title">
+            <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name / Task">
             <div class="flex-row">
-                <input type="text" id="manualAssign" class="input-box" placeholder="Assign to..." list="staffList" style="margin-bottom:0">
+                <input type="text" id="manualAssign" class="input-box" placeholder="Staff..." list="staffList" style="margin-bottom:0">
                 <button class="btn-primary" style="width:100px; padding:10px" onclick="addManualTask()">Add</button>
             </div>
         </div>
@@ -55,13 +67,14 @@
     </div>
 
     <div id="parsePage" class="page">
-        <h3>Lens Parser</h3>
-        <div class="card">
+        <h3 id="parseTitle">Lens Parser</h3>
+        <div class="card" id="parserInputArea">
             <textarea id="rawInput" class="input-box" style="height: 80px;" placeholder="Paste Lens text here..."></textarea>
             <button class="btn-primary" onclick="intelligentParse()">Parse & Extract</button>
         </div>
 
         <div id="editArea" class="card" style="display:none; background: #e3f2fd;">
+            <input type="hidden" id="editTaskId">
             <label class="label">Name</label>
             <input type="text" id="editName" class="input-box">
             <div class="flex-row">
@@ -72,62 +85,46 @@
             <input type="text" id="editAssign" class="input-box" list="staffList">
             <label class="label">Remarks</label>
             <input type="text" id="editRemarks" class="input-box">
-            <button class="btn-primary" style="background:var(--bank-gold)" onclick="commitTask()">Save Extracted Task</button>
+            <button class="btn-primary" style="background:var(--bank-gold)" id="saveBtn" onclick="commitTask()">Save Task</button>
+            <button class="btn-primary" style="background:#888; margin-top:5px;" onclick="cancelEdit()">Cancel</button>
         </div>
     </div>
 
     <datalist id="staffList">
-        <option value="Manager">
-        <option value="Asst Manager">
-        <option value="Clerk">
-        <option value="Cashier">
+        <option value="Manager"><option value="Asst Manager"><option value="Clerk"><option value="Cashier">
     </datalist>
 
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="switchPage('taskPage', this)">
-            <span class="nav-icon">📋</span><span>Daily Tasks</span>
+            <span class="nav-icon">📋</span><span>Tasks</span>
         </button>
         <button class="nav-item" onclick="switchPage('parsePage', this)">
-            <span class="nav-icon">🔍</span><span>Lens Parser</span>
+            <span class="nav-icon">🔍</span><span>Parser</span>
         </button>
     </nav>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v2')) || [];
+    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v3')) || [];
 
     function switchPage(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
+        if(id === 'taskPage') cancelEdit(); // Reset parser when going to task page
         renderTasks();
     }
 
-    // MANUAL ADD LOGIC
     function addManualTask() {
         const date = document.getElementById('globalDate').value;
         const title = document.getElementById('manualTitle').value;
-        const assign = document.getElementById('manualAssign').value;
-        
         if(!date || !title) return alert("Enter Date and Title");
-
-        const task = {
-            id: Date.now(),
-            date: date,
-            name: title,
-            acc: "Manual",
-            phone: "",
-            assigned: assign || "Self",
-            remarks: "Manually entered",
-            done: false
-        };
-
+        const task = { id: Date.now(), date: date, name: title, acc: "Manual", phone: "", assigned: document.getElementById('manualAssign').value || "Self", remarks: "Manual", done: false };
         db.push(task);
         saveAndRender();
         document.getElementById('manualTitle').value = "";
     }
 
-    // PARSER LOGIC
     function intelligentParse() {
         const raw = document.getElementById('rawInput').value;
         if(!raw) return;
@@ -136,6 +133,7 @@
         let nameClean = raw.replace(/[0-9]/g, '').replace(/[^\w\s]/gi, '').trim();
         const name = nameClean.split(/\s+/).slice(0, 2).join(' ') || "New Task";
         
+        document.getElementById('editTaskId').value = "";
         document.getElementById('editName').value = name;
         document.getElementById('editAcc').value = acc;
         document.getElementById('editPhone').value = phone;
@@ -143,22 +141,55 @@
         document.getElementById('editArea').style.display = 'block';
     }
 
+    function editTask(id) {
+        const t = db.find(item => item.id === id);
+        if(!t) return;
+
+        document.getElementById('parseTitle').innerText = "Edit Task";
+        document.getElementById('parserInputArea').style.display = 'none';
+        document.getElementById('editArea').style.display = 'block';
+        
+        document.getElementById('editTaskId').value = t.id;
+        document.getElementById('editName').value = t.name;
+        document.getElementById('editAcc').value = t.acc;
+        document.getElementById('editPhone').value = t.phone;
+        document.getElementById('editAssign').value = t.assigned;
+        document.getElementById('editRemarks').value = t.remarks;
+        
+        switchPage('parsePage', document.querySelectorAll('.nav-item')[1]);
+    }
+
+    function cancelEdit() {
+        document.getElementById('parseTitle').innerText = "Lens Parser";
+        document.getElementById('parserInputArea').style.display = 'block';
+        document.getElementById('editArea').style.display = 'none';
+        document.getElementById('editTaskId').value = "";
+        document.getElementById('rawInput').value = "";
+    }
+
     function commitTask() {
         const date = document.getElementById('globalDate').value;
-        const task = {
-            id: Date.now(),
-            date: date,
+        const id = document.getElementById('editTaskId').value;
+
+        const taskData = {
             name: document.getElementById('editName').value,
             acc: document.getElementById('editAcc').value,
             phone: document.getElementById('editPhone').value,
-            assigned: document.getElementById('editAssign').value || "Unassigned",
+            assigned: document.getElementById('editAssign').value,
             remarks: document.getElementById('editRemarks').value,
-            done: false
+            date: date
         };
-        db.push(task);
+
+        if(id) {
+            // Update existing
+            db = db.map(t => t.id == id ? {...t, ...taskData} : t);
+        } else {
+            // Create new
+            db.push({ id: Date.now(), ...taskData, done: false });
+        }
+
         saveAndRender();
-        document.getElementById('editArea').style.display = 'none';
-        document.getElementById('rawInput').value = "";
+        cancelEdit();
         switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
     }
 
@@ -168,15 +199,16 @@
     }
 
     function rescheduleTask(id) {
-        const newDate = prompt("Enter new date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-        if(newDate) {
-            db = db.map(t => t.id === id ? {...t, date: newDate} : t);
-            saveAndRender();
-        }
+        const newDate = prompt("New date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+        if(newDate) { db = db.map(t => t.id === id ? {...t, date: newDate} : t); saveAndRender(); }
+    }
+
+    function deleteTask(id) {
+        if(confirm("Delete?")) { db = db.filter(t => t.id !== id); saveAndRender(); }
     }
 
     function saveAndRender() {
-        localStorage.setItem('bank_pro_tasks_v2', JSON.stringify(db));
+        localStorage.setItem('bank_pro_tasks_v3', JSON.stringify(db));
         renderTasks();
     }
 
@@ -201,8 +233,9 @@
                         <div class="task-item ${t.done ? 'done' : ''}">
                             <div style="font-weight:bold">${t.name}</div>
                             <div style="font-size:12px; color:#666">Assign: ${t.assigned} | ${t.acc}</div>
-                            <div style="margin-top:8px;">
+                            <div style="margin-top:10px; display:flex;">
                                 <button class="btn-action" onclick="toggleTask(${t.id})">${t.done ? '✅' : '⏳'}</button>
+                                <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
                                 <button class="btn-action" onclick="rescheduleTask(${t.id})">🕒 Move</button>
                                 <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
                             </div>
@@ -212,13 +245,6 @@
             `;
             container.appendChild(block);
         });
-    }
-
-    function deleteTask(id) {
-        if(confirm("Delete this task?")) {
-            db = db.filter(t => t.id !== id);
-            saveAndRender();
-        }
     }
 
     document.getElementById('globalDate').valueAsDate = new Date();
