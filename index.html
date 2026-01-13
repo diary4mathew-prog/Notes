@@ -14,23 +14,18 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; border: none; background: none; }
         .nav-item.active { color: var(--bank-blue); font-weight: bold; }
 
-        /* Pages */
+        /* General UI */
         .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; border: 1px solid #e0e0e0; }
         .input-box { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 16px; margin-bottom: 10px; font-family: inherit; }
         
         /* Task Cards */
         .date-header { background: #e9ecef; padding: 12px 15px; font-weight: bold; border-radius: 10px; display: flex; flex-direction: column; margin-bottom: 5px; cursor: pointer; border: 1px solid #ddd; }
-        .date-summary { font-size: 10px; color: #666; font-weight: normal; margin-top: 4px; display: flex; gap: 8px; }
-        
         .task-item { border-left: 6px solid #ccc; padding: 12px; margin: 8px 0; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .status-custpending { border-left-color: #9b59b6; background-color: #f4ecf7; }
         .status-completed { border-left-color: #27ae60; background-color: #eafaf1; }
-        .status-processing { border-left-color: #3498db; background-color: #ebf5fb; }
-        .status-onhold { border-left-color: #f39c12; background-color: #fef9e7; }
         
         .status-label { font-size: 9px; font-weight: bold; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; float: right; }
         .lbl-custpending { background: #9b59b6; color: white; }
@@ -38,7 +33,7 @@
 
         .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-action { padding: 8px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #ddd; background: white; margin: 4px 4px 0 0; }
-        .btn-email-full { background: #2c3e50; color: white; width: 100%; margin-top: 15px; border-radius: 8px; padding: 12px; border: none; font-weight: bold; font-size: 14px; }
+        .btn-copy { background: #f1f8ff; color: #0366d6; border: 1px solid #0366d6; }
         
         .label { font-size: 10px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
         .remarks-preview { font-size: 11px; color: #666; font-style: italic; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; }
@@ -62,8 +57,7 @@
     <div id="parsePage" class="page">
         <h3 id="parseTitle">Lens Parser</h3>
         <div class="card" id="parserInputArea">
-            <p style="font-size:11px; color:#666; margin-top:0">Format: ID Acc Name Mob Remarks. Split with <b>/</b></p>
-            <textarea id="rawInput" class="input-box" style="height: 120px;" placeholder="Paste here..."></textarea>
+            <textarea id="rawInput" class="input-box" style="height: 100px;" placeholder="Paste here... [ID Acc Name Mob Rem] / [Record 2]"></textarea>
             <button class="btn-primary" onclick="bulkOrSingleParse()">Process Text</button>
         </div>
 
@@ -105,7 +99,7 @@
     </nav>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v15')) || [];
+    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v17')) || [];
 
     function switchPage(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -137,6 +131,13 @@
         return { custId, acc, name, phone, remarks };
     }
 
+    function copyIndividualTask(id) {
+        const t = db.find(item => item.id == id);
+        if(!t) return;
+        const text = `Name: ${t.name}\nID: ${t.custId}\nAcc: ${t.acc}\nMob: ${t.phone}\nRemarks: ${t.remarks || 'None'}`;
+        navigator.clipboard.writeText(text).then(() => alert("Customer Details + Remarks Copied!")).catch(err => alert("Copy failed"));
+    }
+
     function bulkOrSingleParse() {
         const raw = document.getElementById('rawInput').value.trim();
         const date = document.getElementById('globalDate').value;
@@ -164,32 +165,6 @@
         }
     }
 
-    function moveTask(id) {
-        const newDate = prompt("New date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-        if(newDate) { db = db.map(t => t.id == id ? {...t, date: newDate} : t); saveAndRender(); }
-    }
-
-    function emailDateFullReport(date) {
-        const tasks = db.filter(t => t.date === date);
-        if(tasks.length === 0) return alert("No tasks to export.");
-        
-        let body = `--- FULL BANK TASK REPORT: ${date} ---\n\n`;
-        tasks.forEach((t, index) => {
-            body += `TASK #${index + 1}\n`;
-            body += `Name: ${t.name}\n`;
-            body += `ID: ${t.custId} | Acc: ${t.acc}\n`;
-            body += `Mobile: ${t.phone} | Staff: ${t.assigned}\n`;
-            body += `Status: ${t.status.toUpperCase()}\n`;
-            if(t.status === 'custpending') {
-                body += `Informed: ${t.informedDate || 'N/A'} | Reminders: ${t.remindCount}\n`;
-            }
-            body += `Remarks: ${t.remarks || 'None'}\n`;
-            body += `------------------------------------------\n\n`;
-        });
-
-        window.location.href = `mailto:?subject=Detailed Bank Report ${date}&body=${encodeURIComponent(body)}`;
-    }
-
     function renderTasks() {
         const container = document.getElementById('taskContainer');
         container.innerHTML = "";
@@ -197,15 +172,10 @@
 
         Object.keys(grouped).sort().reverse().forEach(date => {
             const tasks = grouped[date];
-            const completed = tasks.filter(t => t.status === 'completed').length;
             const block = document.createElement('div');
             block.innerHTML = `
                 <div class="date-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                    <span>📅 ${date} (${tasks.length} Tasks)</span>
-                    <div class="date-summary">
-                        <span style="color:green">✅ ${completed} Done</span>
-                        <span style="color:#666">⏳ ${tasks.length - completed} Pending</span>
-                    </div>
+                    <span>📅 ${date} (${tasks.length})</span>
                 </div>
                 <div style="display:none">
                     ${tasks.map(t => `
@@ -213,19 +183,26 @@
                             <span class="status-label lbl-${t.status}">${t.status}</span>
                             <div style="font-weight:bold; color:var(--bank-blue);">${t.name}</div>
                             <div style="font-size:11px; color:#666">ID: ${t.custId} | Acc: ${t.acc}</div>
-                            ${t.remarks ? `<div class="remarks-preview">${t.remarks}</div>` : ''}
-                            <div style="margin-top:8px;">
+                            ${t.remarks ? `<div class="remarks-preview">Note: ${t.remarks}</div>` : ''}
+                            <div style="margin-top:10px;">
+                                <button class="btn-action btn-copy" onclick="copyIndividualTask(${t.id})">📋 Copy</button>
                                 <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
-                                <button class="btn-action" onclick="moveTask(${t.id})">📅 Move</button>
                                 <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
                             </div>
                         </div>
                     `).join('')}
-                    <button class="btn-email-full" onclick="emailDateFullReport('${date}')">📧 Export Full Detailed Report</button>
+                    <button class="btn-primary" style="background:#6c757d; margin-top:10px;" onclick="emailDate('${date}')">📧 Email Report</button>
                 </div>
             `;
             container.appendChild(block);
         });
+    }
+
+    function emailDate(date) {
+        const tasks = db.filter(t => t.date === date);
+        let body = `Detailed Report: ${date}\n\n`;
+        tasks.forEach((t, i) => { body += `${i+1}. ${t.name}\nID: ${t.custId} | Acc: ${t.acc}\nStatus: ${t.status}\nRem: ${t.remarks}\n---\n`; });
+        window.location.href = `mailto:?subject=Bank Tasks ${date}&body=${encodeURIComponent(body)}`;
     }
 
     function editTask(id) {
@@ -277,7 +254,7 @@
         document.getElementById('manualTitle').value = "";
     }
 
-    function saveAndRender() { localStorage.setItem('bank_pro_tasks_v15', JSON.stringify(db)); renderTasks(); }
+    function saveAndRender() { localStorage.setItem('bank_pro_tasks_v17', JSON.stringify(db)); renderTasks(); }
     function cancelEdit() { document.getElementById('parserInputArea').style.display = 'block'; document.getElementById('editArea').style.display = 'none'; }
     function deleteTask(id) { if(confirm("Delete?")) { db = db.filter(t => t.id != id); saveAndRender(); } }
     document.getElementById('globalDate').valueAsDate = new Date();
