@@ -9,7 +9,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; }
 
-        /* Navigation - Floating */
+        /* Navigation - Floating Pill */
         .bottom-nav { position: fixed; bottom: 25px; left: 5%; width: 90%; background: white; display: flex; border-radius: 20px; height: 65px; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 1px solid #ddd; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; border: none; background: none; }
         .nav-item.active { color: var(--bank-blue); font-weight: bold; }
@@ -42,10 +42,10 @@
 
         .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-action { padding: 8px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #ddd; background: white; margin: 4px 4px 0 0; }
-        .btn-wa { background: #25D366; color: white; border: none; }
         
         .label { font-size: 10px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
         .info-tag { font-size: 11px; background: #fff; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; margin-top: 5px; display: inline-block; margin-right: 5px; }
+        .remarks-preview { font-size: 11px; color: #666; font-style: italic; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; }
     </style>
 </head>
 <body>
@@ -66,7 +66,8 @@
     <div id="parsePage" class="page">
         <h3 id="parseTitle">Lens Parser</h3>
         <div class="card" id="parserInputArea">
-            <textarea id="rawInput" class="input-box" style="height: 100px;" placeholder="Paste text here..."></textarea>
+            <p style="font-size:11px; color:#666; margin-top:0">Format: ID Acc Name Mob Remarks. Separate records with <b>/</b></p>
+            <textarea id="rawInput" class="input-box" style="height: 120px;" placeholder="Paste here... 101 5055 John 9876 Kyc pending / 102 6066 Mary 1234 Need sign"></textarea>
             <button class="btn-primary" onclick="bulkOrSingleParse()">Process Text</button>
         </div>
 
@@ -114,7 +115,7 @@
     </nav>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v10')) || [];
+    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v11')) || [];
 
     function switchPage(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -139,21 +140,53 @@
         document.getElementById('manualTitle').value = "";
     }
 
+    // UPDATED PARSE LOGIC
+    function parseLogic(text) {
+        const parts = text.trim().split(/\s+/);
+        const custId = parts[0] || "";
+        const acc = parts[1] || "";
+        
+        // Find phone (usually 10 digits)
+        let phoneIdx = parts.findIndex(p => /^\d{10}$/.test(p));
+        
+        // Default if not found
+        if (phoneIdx === -1) phoneIdx = parts.length > 3 ? 3 : parts.length - 1;
+
+        const name = parts.slice(2, phoneIdx).join(' ') || "Unknown";
+        const phone = parts[phoneIdx] || "";
+        const remarks = parts.slice(phoneIdx + 1).join(' ') || "";
+
+        return { custId, acc, name, phone, remarks };
+    }
+
     function bulkOrSingleParse() {
         const raw = document.getElementById('rawInput').value.trim();
         if(!raw) return;
-        const parts = raw.split(/\s+/);
-        const parsed = { custId: parts[0], acc: parts[1], phone: parts[parts.length-1], name: parts.slice(2, parts.length-1).join(' ') || "Unknown" };
-        
-        document.getElementById('editTaskId').value = "";
-        document.getElementById('editCustId').value = parsed.custId;
-        document.getElementById('editAcc').value = parsed.acc;
-        document.getElementById('editName').value = parsed.name;
-        document.getElementById('editPhone').value = parsed.phone;
-        document.getElementById('editStatus').value = "pending";
-        toggleCustFields();
-        document.getElementById('parserInputArea').style.display = 'none';
-        document.getElementById('editArea').style.display = 'block';
+
+        if (raw.includes('/')) {
+            const records = raw.split('/');
+            const date = document.getElementById('globalDate').value;
+            records.forEach(rec => {
+                if(rec.trim()) {
+                    const parsed = parseLogic(rec);
+                    db.push({ id: Date.now() + Math.random(), date: date, ...parsed, assigned: "Unassigned", status: "pending", informedDate: "", remindCount: 0 });
+                }
+            });
+            saveAndRender();
+            switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
+        } else {
+            const parsed = parseLogic(raw);
+            document.getElementById('editTaskId').value = "";
+            document.getElementById('editCustId').value = parsed.custId;
+            document.getElementById('editAcc').value = parsed.acc;
+            document.getElementById('editName').value = parsed.name;
+            document.getElementById('editPhone').value = parsed.phone;
+            document.getElementById('editRemarks').value = parsed.remarks;
+            document.getElementById('editStatus').value = "pending";
+            toggleCustFields();
+            document.getElementById('parserInputArea').style.display = 'none';
+            document.getElementById('editArea').style.display = 'block';
+        }
     }
 
     function editTask(id) {
@@ -213,14 +246,8 @@
         saveAndRender();
     }
 
-    function sendWhatsApp(phone, name) {
-        if(!phone || phone === "N/A") return alert("No phone number!");
-        const msg = encodeURIComponent(`Hello ${name}, this is from the Bank regarding your pending requirements. Please provide the details as discussed.`);
-        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-    }
-
     function saveAndRender() {
-        localStorage.setItem('bank_pro_tasks_v10', JSON.stringify(db));
+        localStorage.setItem('bank_pro_tasks_v11', JSON.stringify(db));
         renderTasks();
     }
 
@@ -241,16 +268,16 @@
                         <div class="task-item status-${t.status || 'pending'}">
                             <span class="status-label lbl-${t.status || 'pending'}">${t.status === 'custpending' ? 'Cust-Pending' : t.status || 'pending'}</span>
                             <div style="font-weight:bold; color:var(--bank-blue);">${t.name}</div>
-                            <div style="font-size:12px; color:#555">Acc: ${t.acc}</div>
+                            <div style="font-size:12px; color:#555">ID: ${t.custId} | Acc: ${t.acc}</div>
+                            ${t.remarks ? `<div class="remarks-preview">Note: ${t.remarks}</div>` : ''}
                             ${t.status === 'custpending' ? `
                                 <div class="info-tag">📢 Informed: ${t.informedDate || '---'}</div>
                                 <div class="info-tag">🔔 Reminders: ${t.remindCount}</div>
                                 <button class="btn-action" style="background:#e8f5e9; border:1px solid #27ae60;" onclick="incrementReminder(${t.id})">+1 Reminder</button>
                             ` : ''}
-                            <div style="margin-top:10px; display:flex; flex-wrap:wrap;">
+                            <div style="margin-top:10px;">
                                 <button class="btn-action" onclick="cycleStatus(${t.id})">🔄 Status</button>
                                 <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
-                                <button class="btn-action btn-wa" onclick="sendWhatsApp('${t.phone}', '${t.name}')">WA Message</button>
                                 <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
                             </div>
                         </div>
