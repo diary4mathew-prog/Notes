@@ -32,8 +32,11 @@
         .lbl-completed { background: #27ae60; color: white; }
 
         .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-action { padding: 8px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #ddd; background: white; margin: 4px 4px 0 0; }
-        .btn-copy { background: #f1f8ff; color: #0366d6; border: 1px solid #0366d6; }
+        
+        /* Button Grid Styling */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .btn-action { padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #ddd; background: white; text-align: center; }
+        .btn-copy { background: #f1f8ff; color: #0366d6; border-color: #0366d6; }
         
         .label { font-size: 10px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
         .remarks-preview { font-size: 11px; color: #666; font-style: italic; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; }
@@ -57,7 +60,7 @@
     <div id="parsePage" class="page">
         <h3 id="parseTitle">Lens Parser</h3>
         <div class="card" id="parserInputArea">
-            <textarea id="rawInput" class="input-box" style="height: 100px;" placeholder="Paste here... [ID Acc Name Mob Rem] / [Record 2]"></textarea>
+            <textarea id="rawInput" class="input-box" style="height: 100px;" placeholder="Paste here... ID Acc Name Mob Rem / Next"></textarea>
             <button class="btn-primary" onclick="bulkOrSingleParse()">Process Text</button>
         </div>
 
@@ -135,33 +138,14 @@
         const t = db.find(item => item.id == id);
         if(!t) return;
         const text = `Name: ${t.name}\nID: ${t.custId}\nAcc: ${t.acc}\nMob: ${t.phone}\nRemarks: ${t.remarks || 'None'}`;
-        navigator.clipboard.writeText(text).then(() => alert("Customer Details + Remarks Copied!")).catch(err => alert("Copy failed"));
+        navigator.clipboard.writeText(text).then(() => alert("Copied!")).catch(err => alert("Copy failed"));
     }
 
-    function bulkOrSingleParse() {
-        const raw = document.getElementById('rawInput').value.trim();
-        const date = document.getElementById('globalDate').value;
-        if (raw.includes('/')) {
-            raw.split('/').forEach(rec => {
-                if(rec.trim()) {
-                    const parsed = parseLogic(rec);
-                    db.push({ id: Date.now() + Math.random(), date, ...parsed, assigned: "Unassigned", status: "pending", informedDate: "", remindCount: 0 });
-                }
-            });
+    function moveTask(id) {
+        const newDate = prompt("Move to date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+        if(newDate) {
+            db = db.map(t => t.id == id ? {...t, date: newDate} : t);
             saveAndRender();
-            switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
-        } else {
-            const parsed = parseLogic(raw);
-            document.getElementById('editTaskId').value = "";
-            document.getElementById('editCustId').value = parsed.custId;
-            document.getElementById('editAcc').value = parsed.acc;
-            document.getElementById('editName').value = parsed.name;
-            document.getElementById('editPhone').value = parsed.phone;
-            document.getElementById('editRemarks').value = parsed.remarks;
-            document.getElementById('editStatus').value = "pending";
-            toggleCustFields();
-            document.getElementById('parserInputArea').style.display = 'none';
-            document.getElementById('editArea').style.display = 'block';
         }
     }
 
@@ -184,10 +168,11 @@
                             <div style="font-weight:bold; color:var(--bank-blue);">${t.name}</div>
                             <div style="font-size:11px; color:#666">ID: ${t.custId} | Acc: ${t.acc}</div>
                             ${t.remarks ? `<div class="remarks-preview">Note: ${t.remarks}</div>` : ''}
-                            <div style="margin-top:10px;">
+                            <div class="action-grid">
                                 <button class="btn-action btn-copy" onclick="copyIndividualTask(${t.id})">📋 Copy</button>
                                 <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
-                                <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
+                                <button class="btn-action" onclick="moveTask(${t.id})">📅 Move</button>
+                                <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️ Delete</button>
                             </div>
                         </div>
                     `).join('')}
