@@ -23,10 +23,14 @@
         .input-box { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 16px; margin-bottom: 10px; font-family: inherit; }
         
         /* Task Cards */
-        .date-header { background: #e9ecef; padding: 12px 15px; font-weight: bold; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; cursor: pointer; }
-        .task-item { border-left: 6px solid #ccc; padding: 12px; margin: 8px 0; background: #fff; border-radius: 8px; }
+        .date-header { background: #e9ecef; padding: 12px 15px; font-weight: bold; border-radius: 10px; display: flex; flex-direction: column; margin-bottom: 5px; cursor: pointer; border: 1px solid #ddd; }
+        .date-summary { font-size: 10px; color: #666; font-weight: normal; margin-top: 4px; display: flex; gap: 8px; }
+        
+        .task-item { border-left: 6px solid #ccc; padding: 12px; margin: 8px 0; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .status-custpending { border-left-color: #9b59b6; background-color: #f4ecf7; }
         .status-completed { border-left-color: #27ae60; background-color: #eafaf1; }
+        .status-processing { border-left-color: #3498db; background-color: #ebf5fb; }
+        .status-onhold { border-left-color: #f39c12; background-color: #fef9e7; }
         
         .status-label { font-size: 9px; font-weight: bold; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; float: right; }
         .lbl-custpending { background: #9b59b6; color: white; }
@@ -34,6 +38,8 @@
 
         .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-action { padding: 8px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #ddd; background: white; margin: 4px 4px 0 0; }
+        .btn-email-full { background: #2c3e50; color: white; width: 100%; margin-top: 15px; border-radius: 8px; padding: 12px; border: none; font-weight: bold; font-size: 14px; }
+        
         .label { font-size: 10px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
         .remarks-preview { font-size: 11px; color: #666; font-style: italic; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; }
     </style>
@@ -44,7 +50,7 @@
         <h3 style="margin:0 0 10px 0;">Bank Task Log</h3>
         <div class="card" style="background: #fff9c4; border: 1px solid #fbc02d;">
             <input type="date" id="globalDate" class="input-box">
-            <input type="text" id="manualTitle" class="input-box" placeholder="Manual Task Name">
+            <input type="text" id="manualTitle" class="input-box" placeholder="Manual Name/Task">
             <div style="display:flex; gap:8px;">
                 <input type="text" id="manualAssign" class="input-box" placeholder="Assign..." list="staffList" style="flex:1; margin-bottom:0">
                 <button class="btn-primary" style="width:70px;" onclick="addManualTask()">Add</button>
@@ -56,8 +62,8 @@
     <div id="parsePage" class="page">
         <h3 id="parseTitle">Lens Parser</h3>
         <div class="card" id="parserInputArea">
-            <p style="font-size:11px; color:#666; margin-top:0">Format: [Num:ID] [Num:Acc] [Alpha:Name] [Num:Mob] [Remarks]. Split with <b>/</b></p>
-            <textarea id="rawInput" class="input-box" style="height: 120px;" placeholder="Example: 1001 55002233 Rajesh Kumar 9847000000 KYC Pending / 1002 44001122 John Doe 9995112233 Sign missing"></textarea>
+            <p style="font-size:11px; color:#666; margin-top:0">Format: ID Acc Name Mob Remarks. Split with <b>/</b></p>
+            <textarea id="rawInput" class="input-box" style="height: 120px;" placeholder="Paste here..."></textarea>
             <button class="btn-primary" onclick="bulkOrSingleParse()">Process Text</button>
         </div>
 
@@ -94,20 +100,19 @@
     <datalist id="staffList"><option value="Manager"><option value="Asst Manager"><option value="Clerk"><option value="Cashier"></datalist>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="switchPage('taskPage', this)">Tasks</button>
-        <button class="nav-item" onclick="switchPage('parsePage', this)">Parser</button>
+        <button class="nav-item active" onclick="switchPage('taskPage', this)">📋 Tasks</button>
+        <button class="nav-item" onclick="switchPage('parsePage', this)">🔍 Parser</button>
     </nav>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v13')) || [];
+    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v15')) || [];
 
     function switchPage(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
-        if(id === 'taskPage') cancelEdit();
-        renderTasks();
+        if(id === 'taskPage') renderTasks();
     }
 
     function toggleCustFields() {
@@ -115,53 +120,26 @@
         document.getElementById('custFollowUpFields').style.display = (status === 'custpending') ? 'block' : 'none';
     }
 
-    // TYPE-BASED SCAN LOGIC
     function parseLogic(text) {
         const words = text.trim().split(/\s+/);
-        let custId = "", acc = "", name = "", phone = "", remarks = "";
-        
-        let numericBlocks = words.filter(w => /^\d+$/.test(w));
-        let alphaBlocks = []; // To store words that aren't strictly numeric
-        
-        // Sequence: 1st Num = ID, 2nd Num = Acc
-        custId = numericBlocks[0] || "";
-        acc = numericBlocks[1] || "";
-        
-        // Find the index in the original 'words' array where Phone starts
-        // Phone is the 3rd numeric block found after the ID and Acc indexes
-        let foundPhoneIdx = -1;
-        let numCount = 0;
+        let custId = words[0] || "", acc = words[1] || "", name = "", phone = "", remarks = "";
+        let numCount = 0, foundPhoneIdx = -1;
         for(let i=0; i < words.length; i++) {
             if(/^\d+$/.test(words[i])) {
                 numCount++;
-                if(numCount === 3) {
-                    foundPhoneIdx = i;
-                    phone = words[i];
-                    break;
-                }
+                if(numCount === 3) { foundPhoneIdx = i; phone = words[i]; break; }
             }
         }
-
         if(foundPhoneIdx !== -1) {
-            // Name is everything between the 2nd numeric word and 3rd numeric word
-            // Remarks is everything after the 3rd numeric word
-            let accIdx = words.indexOf(acc);
-            name = words.slice(accIdx + 1, foundPhoneIdx).join(' ');
+            name = words.slice(2, foundPhoneIdx).join(' ');
             remarks = words.slice(foundPhoneIdx + 1).join(' ');
-        } else {
-            // Fallback: If 3rd number not found, everything after Acc is name
-            let accIdx = words.indexOf(acc);
-            name = words.slice(accIdx + 1).join(' ');
-        }
-
+        } else { name = words.slice(2).join(' '); }
         return { custId, acc, name, phone, remarks };
     }
 
     function bulkOrSingleParse() {
         const raw = document.getElementById('rawInput').value.trim();
-        if(!raw) return;
         const date = document.getElementById('globalDate').value;
-
         if (raw.includes('/')) {
             raw.split('/').forEach(rec => {
                 if(rec.trim()) {
@@ -184,6 +162,70 @@
             document.getElementById('parserInputArea').style.display = 'none';
             document.getElementById('editArea').style.display = 'block';
         }
+    }
+
+    function moveTask(id) {
+        const newDate = prompt("New date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+        if(newDate) { db = db.map(t => t.id == id ? {...t, date: newDate} : t); saveAndRender(); }
+    }
+
+    function emailDateFullReport(date) {
+        const tasks = db.filter(t => t.date === date);
+        if(tasks.length === 0) return alert("No tasks to export.");
+        
+        let body = `--- FULL BANK TASK REPORT: ${date} ---\n\n`;
+        tasks.forEach((t, index) => {
+            body += `TASK #${index + 1}\n`;
+            body += `Name: ${t.name}\n`;
+            body += `ID: ${t.custId} | Acc: ${t.acc}\n`;
+            body += `Mobile: ${t.phone} | Staff: ${t.assigned}\n`;
+            body += `Status: ${t.status.toUpperCase()}\n`;
+            if(t.status === 'custpending') {
+                body += `Informed: ${t.informedDate || 'N/A'} | Reminders: ${t.remindCount}\n`;
+            }
+            body += `Remarks: ${t.remarks || 'None'}\n`;
+            body += `------------------------------------------\n\n`;
+        });
+
+        window.location.href = `mailto:?subject=Detailed Bank Report ${date}&body=${encodeURIComponent(body)}`;
+    }
+
+    function renderTasks() {
+        const container = document.getElementById('taskContainer');
+        container.innerHTML = "";
+        const grouped = db.reduce((acc, t) => { acc[t.date] = acc[t.date] || []; acc[t.date].push(t); return acc; }, {});
+
+        Object.keys(grouped).sort().reverse().forEach(date => {
+            const tasks = grouped[date];
+            const completed = tasks.filter(t => t.status === 'completed').length;
+            const block = document.createElement('div');
+            block.innerHTML = `
+                <div class="date-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                    <span>📅 ${date} (${tasks.length} Tasks)</span>
+                    <div class="date-summary">
+                        <span style="color:green">✅ ${completed} Done</span>
+                        <span style="color:#666">⏳ ${tasks.length - completed} Pending</span>
+                    </div>
+                </div>
+                <div style="display:none">
+                    ${tasks.map(t => `
+                        <div class="task-item status-${t.status}">
+                            <span class="status-label lbl-${t.status}">${t.status}</span>
+                            <div style="font-weight:bold; color:var(--bank-blue);">${t.name}</div>
+                            <div style="font-size:11px; color:#666">ID: ${t.custId} | Acc: ${t.acc}</div>
+                            ${t.remarks ? `<div class="remarks-preview">${t.remarks}</div>` : ''}
+                            <div style="margin-top:8px;">
+                                <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
+                                <button class="btn-action" onclick="moveTask(${t.id})">📅 Move</button>
+                                <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <button class="btn-email-full" onclick="emailDateFullReport('${date}')">📧 Export Full Detailed Report</button>
+                </div>
+            `;
+            container.appendChild(block);
+        });
     }
 
     function editTask(id) {
@@ -226,50 +268,16 @@
         switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
     }
 
-    function saveAndRender() {
-        localStorage.setItem('bank_pro_tasks_v13', JSON.stringify(db));
-        renderTasks();
-    }
-
-    function renderTasks() {
-        const container = document.getElementById('taskContainer');
-        container.innerHTML = "";
-        const grouped = db.reduce((acc, t) => { acc[t.date] = acc[t.date] || []; acc[t.date].push(t); return acc; }, {});
-
-        Object.keys(grouped).sort().reverse().forEach(date => {
-            const block = document.createElement('div');
-            block.innerHTML = `
-                <div class="date-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                    <span>📅 ${date}</span>
-                    <span style="font-size:12px">${grouped[date].length} Tasks</span>
-                </div>
-                <div style="display:none">
-                    ${grouped[date].map(t => `
-                        <div class="task-item status-${t.status || 'pending'}">
-                            <span class="status-label lbl-${t.status || 'pending'}">${t.status}</span>
-                            <div style="font-weight:bold; color:var(--bank-blue);">${t.name}</div>
-                            <div style="font-size:12px; color:#555">ID: ${t.custId} | Acc: ${t.acc}</div>
-                            ${t.remarks ? `<div class="remarks-preview">Note: ${t.remarks}</div>` : ''}
-                            <div style="margin-top:10px;">
-                                <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
-                                <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            container.appendChild(block);
-        });
-    }
-
     function addManualTask() {
         const date = document.getElementById('globalDate').value;
         const title = document.getElementById('manualTitle').value;
         if(!date || !title) return alert("Enter Date/Title");
         db.push({ id: Date.now(), date, name: title, custId: "Manual", acc: "", phone: "", assigned: document.getElementById('manualAssign').value || "Self", remarks: "", status: "pending", informedDate: "", remindCount: 0 });
         saveAndRender();
+        document.getElementById('manualTitle').value = "";
     }
 
+    function saveAndRender() { localStorage.setItem('bank_pro_tasks_v15', JSON.stringify(db)); renderTasks(); }
     function cancelEdit() { document.getElementById('parserInputArea').style.display = 'block'; document.getElementById('editArea').style.display = 'none'; }
     function deleteTask(id) { if(confirm("Delete?")) { db = db.filter(t => t.id != id); saveAndRender(); } }
     document.getElementById('globalDate').valueAsDate = new Date();
