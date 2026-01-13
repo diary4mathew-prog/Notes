@@ -9,7 +9,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; }
 
-        /* Navigation - Floating Pill */
+        /* Navigation */
         .bottom-nav { position: fixed; bottom: 25px; left: 5%; width: 90%; background: white; display: flex; border-radius: 20px; height: 65px; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 1px solid #ddd; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; border: none; background: none; }
         .nav-item.active { color: var(--bank-blue); font-weight: bold; }
@@ -24,27 +24,17 @@
         
         /* Task Cards */
         .date-header { background: #e9ecef; padding: 12px 15px; font-weight: bold; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; cursor: pointer; }
-        .task-item { border-left: 6px solid #ccc; padding: 12px; margin: 8px 0; background: #fff; border-radius: 8px; position: relative; }
-        
-        /* Status Colors */
-        .status-pending { border-left-color: #888; }
-        .status-processing { border-left-color: #3498db; background-color: #ebf5fb; }
-        .status-onhold { border-left-color: #f39c12; background-color: #fef9e7; }
+        .task-item { border-left: 6px solid #ccc; padding: 12px; margin: 8px 0; background: #fff; border-radius: 8px; }
         .status-custpending { border-left-color: #9b59b6; background-color: #f4ecf7; }
         .status-completed { border-left-color: #27ae60; background-color: #eafaf1; }
         
         .status-label { font-size: 9px; font-weight: bold; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; float: right; }
-        .lbl-pending { background: #eee; color: #666; }
-        .lbl-processing { background: #3498db; color: white; }
-        .lbl-onhold { background: #f39c12; color: white; }
         .lbl-custpending { background: #9b59b6; color: white; }
         .lbl-completed { background: #27ae60; color: white; }
 
         .btn-primary { background: var(--bank-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .btn-action { padding: 8px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #ddd; background: white; margin: 4px 4px 0 0; }
-        
         .label { font-size: 10px; font-weight: bold; color: var(--bank-blue); margin-top: 5px; display: block; text-transform: uppercase; }
-        .info-tag { font-size: 11px; background: #fff; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; margin-top: 5px; display: inline-block; margin-right: 5px; }
         .remarks-preview { font-size: 11px; color: #666; font-style: italic; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; }
     </style>
 </head>
@@ -54,7 +44,7 @@
         <h3 style="margin:0 0 10px 0;">Bank Task Log</h3>
         <div class="card" style="background: #fff9c4; border: 1px solid #fbc02d;">
             <input type="date" id="globalDate" class="input-box">
-            <input type="text" id="manualTitle" class="input-box" placeholder="Task or Name">
+            <input type="text" id="manualTitle" class="input-box" placeholder="Manual Task Name">
             <div style="display:flex; gap:8px;">
                 <input type="text" id="manualAssign" class="input-box" placeholder="Assign..." list="staffList" style="flex:1; margin-bottom:0">
                 <button class="btn-primary" style="width:70px;" onclick="addManualTask()">Add</button>
@@ -66,22 +56,22 @@
     <div id="parsePage" class="page">
         <h3 id="parseTitle">Lens Parser</h3>
         <div class="card" id="parserInputArea">
-            <p style="font-size:11px; color:#666; margin-top:0">Format: ID Acc Name Mob Remarks. Separate records with <b>/</b></p>
-            <textarea id="rawInput" class="input-box" style="height: 120px;" placeholder="Paste here... 101 5055 John 9876 Kyc pending / 102 6066 Mary 1234 Need sign"></textarea>
+            <p style="font-size:11px; color:#666; margin-top:0">Format: [Num:ID] [Num:Acc] [Alpha:Name] [Num:Mob] [Remarks]. Split with <b>/</b></p>
+            <textarea id="rawInput" class="input-box" style="height: 120px;" placeholder="Example: 1001 55002233 Rajesh Kumar 9847000000 KYC Pending / 1002 44001122 John Doe 9995112233 Sign missing"></textarea>
             <button class="btn-primary" onclick="bulkOrSingleParse()">Process Text</button>
         </div>
 
         <div id="editArea" class="card" style="display:none; background: #e3f2fd;">
             <input type="hidden" id="editTaskId">
-            <label class="label">Customer Details</label>
             <div style="display:flex; gap:8px;">
-                <input type="text" id="editCustId" class="input-box" style="flex:1" placeholder="ID">
-                <input type="text" id="editAcc" class="input-box" style="flex:1" placeholder="Acc">
+                <div style="flex:1"><label class="label">Cust ID</label><input type="text" id="editCustId" class="input-box"></div>
+                <div style="flex:1"><label class="label">Acc No</label><input type="text" id="editAcc" class="input-box"></div>
             </div>
-            <input type="text" id="editName" class="input-box" placeholder="Name">
+            <label class="label">Full Name</label>
+            <input type="text" id="editName" class="input-box">
             <div style="display:flex; gap:8px;">
-                <input type="text" id="editPhone" class="input-box" style="flex:1" placeholder="Mobile">
-                <input type="text" id="editAssign" class="input-box" style="flex:1" list="staffList" placeholder="Staff">
+                <div style="flex:1"><label class="label">Mobile</label><input type="text" id="editPhone" class="input-box"></div>
+                <div style="flex:1"><label class="label">Staff</label><input type="text" id="editAssign" class="input-box" list="staffList"></div>
             </div>
             <label class="label">Status</label>
             <select id="editStatus" class="input-box" onchange="toggleCustFields()">
@@ -91,23 +81,17 @@
                 <option value="custpending">Cust-Pending</option>
                 <option value="completed">Completed</option>
             </select>
-            
             <div id="custFollowUpFields" style="display:none; padding:10px; background:#fff; border-radius:8px; margin-bottom:10px; border:1px solid #9b59b6;">
-                <label class="label">Informed Date</label>
-                <input type="date" id="informedDate" class="input-box">
-                <label class="label">Reminder Count</label>
-                <input type="number" id="remindCount" class="input-box" value="0">
+                <label class="label">Informed Date</label><input type="date" id="informedDate" class="input-box">
+                <label class="label">Reminders</label><input type="number" id="remindCount" class="input-box" value="0">
             </div>
-
             <textarea id="editRemarks" class="input-box" style="height:60px" placeholder="Remarks..."></textarea>
             <button class="btn-primary" style="background:var(--bank-gold)" onclick="commitTask()">Save Task</button>
             <button class="btn-primary" style="background:#888; margin-top:5px;" onclick="cancelEdit()">Cancel</button>
         </div>
     </div>
 
-    <datalist id="staffList">
-        <option value="Manager"><option value="Asst Manager"><option value="Clerk"><option value="Cashier">
-    </datalist>
+    <datalist id="staffList"><option value="Manager"><option value="Asst Manager"><option value="Clerk"><option value="Cashier"></datalist>
 
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="switchPage('taskPage', this)">Tasks</button>
@@ -115,7 +99,7 @@
     </nav>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v11')) || [];
+    let db = JSON.parse(localStorage.getItem('bank_pro_tasks_v13')) || [];
 
     function switchPage(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -131,30 +115,44 @@
         document.getElementById('custFollowUpFields').style.display = (status === 'custpending') ? 'block' : 'none';
     }
 
-    function addManualTask() {
-        const date = document.getElementById('globalDate').value;
-        const title = document.getElementById('manualTitle').value;
-        if(!date || !title) return alert("Enter Date/Title");
-        db.push({ id: Date.now(), date: date, name: title, custId: "Manual", acc: "", phone: "", assigned: document.getElementById('manualAssign').value || "Self", remarks: "", status: "pending", informedDate: "", remindCount: 0 });
-        saveAndRender();
-        document.getElementById('manualTitle').value = "";
-    }
-
-    // UPDATED PARSE LOGIC
+    // TYPE-BASED SCAN LOGIC
     function parseLogic(text) {
-        const parts = text.trim().split(/\s+/);
-        const custId = parts[0] || "";
-        const acc = parts[1] || "";
+        const words = text.trim().split(/\s+/);
+        let custId = "", acc = "", name = "", phone = "", remarks = "";
         
-        // Find phone (usually 10 digits)
-        let phoneIdx = parts.findIndex(p => /^\d{10}$/.test(p));
+        let numericBlocks = words.filter(w => /^\d+$/.test(w));
+        let alphaBlocks = []; // To store words that aren't strictly numeric
         
-        // Default if not found
-        if (phoneIdx === -1) phoneIdx = parts.length > 3 ? 3 : parts.length - 1;
+        // Sequence: 1st Num = ID, 2nd Num = Acc
+        custId = numericBlocks[0] || "";
+        acc = numericBlocks[1] || "";
+        
+        // Find the index in the original 'words' array where Phone starts
+        // Phone is the 3rd numeric block found after the ID and Acc indexes
+        let foundPhoneIdx = -1;
+        let numCount = 0;
+        for(let i=0; i < words.length; i++) {
+            if(/^\d+$/.test(words[i])) {
+                numCount++;
+                if(numCount === 3) {
+                    foundPhoneIdx = i;
+                    phone = words[i];
+                    break;
+                }
+            }
+        }
 
-        const name = parts.slice(2, phoneIdx).join(' ') || "Unknown";
-        const phone = parts[phoneIdx] || "";
-        const remarks = parts.slice(phoneIdx + 1).join(' ') || "";
+        if(foundPhoneIdx !== -1) {
+            // Name is everything between the 2nd numeric word and 3rd numeric word
+            // Remarks is everything after the 3rd numeric word
+            let accIdx = words.indexOf(acc);
+            name = words.slice(accIdx + 1, foundPhoneIdx).join(' ');
+            remarks = words.slice(foundPhoneIdx + 1).join(' ');
+        } else {
+            // Fallback: If 3rd number not found, everything after Acc is name
+            let accIdx = words.indexOf(acc);
+            name = words.slice(accIdx + 1).join(' ');
+        }
 
         return { custId, acc, name, phone, remarks };
     }
@@ -162,14 +160,13 @@
     function bulkOrSingleParse() {
         const raw = document.getElementById('rawInput').value.trim();
         if(!raw) return;
+        const date = document.getElementById('globalDate').value;
 
         if (raw.includes('/')) {
-            const records = raw.split('/');
-            const date = document.getElementById('globalDate').value;
-            records.forEach(rec => {
+            raw.split('/').forEach(rec => {
                 if(rec.trim()) {
                     const parsed = parseLogic(rec);
-                    db.push({ id: Date.now() + Math.random(), date: date, ...parsed, assigned: "Unassigned", status: "pending", informedDate: "", remindCount: 0 });
+                    db.push({ id: Date.now() + Math.random(), date, ...parsed, assigned: "Unassigned", status: "pending", informedDate: "", remindCount: 0 });
                 }
             });
             saveAndRender();
@@ -200,10 +197,10 @@
         document.getElementById('editAcc').value = t.acc;
         document.getElementById('editPhone').value = t.phone;
         document.getElementById('editAssign').value = t.assigned;
-        document.getElementById('editStatus').value = t.status || "pending";
-        document.getElementById('informedDate').value = t.informedDate || "";
-        document.getElementById('remindCount').value = t.remindCount || 0;
-        document.getElementById('editRemarks').value = t.remarks || "";
+        document.getElementById('editStatus').value = t.status;
+        document.getElementById('informedDate').value = t.informedDate;
+        document.getElementById('remindCount').value = t.remindCount;
+        document.getElementById('editRemarks').value = t.remarks;
         toggleCustFields();
         switchPage('parsePage', document.querySelectorAll('.nav-item')[1]);
     }
@@ -229,25 +226,8 @@
         switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
     }
 
-    function incrementReminder(id) {
-        db = db.map(t => t.id == id ? {...t, remindCount: parseInt(t.remindCount || 0) + 1} : t);
-        saveAndRender();
-    }
-
-    function cycleStatus(id) {
-        const states = ['pending', 'processing', 'onhold', 'custpending', 'completed'];
-        db = db.map(t => {
-            if(t.id == id) {
-                let next = states[(states.indexOf(t.status || 'pending') + 1) % states.length];
-                return {...t, status: next};
-            }
-            return t;
-        });
-        saveAndRender();
-    }
-
     function saveAndRender() {
-        localStorage.setItem('bank_pro_tasks_v11', JSON.stringify(db));
+        localStorage.setItem('bank_pro_tasks_v13', JSON.stringify(db));
         renderTasks();
     }
 
@@ -266,17 +246,11 @@
                 <div style="display:none">
                     ${grouped[date].map(t => `
                         <div class="task-item status-${t.status || 'pending'}">
-                            <span class="status-label lbl-${t.status || 'pending'}">${t.status === 'custpending' ? 'Cust-Pending' : t.status || 'pending'}</span>
+                            <span class="status-label lbl-${t.status || 'pending'}">${t.status}</span>
                             <div style="font-weight:bold; color:var(--bank-blue);">${t.name}</div>
                             <div style="font-size:12px; color:#555">ID: ${t.custId} | Acc: ${t.acc}</div>
                             ${t.remarks ? `<div class="remarks-preview">Note: ${t.remarks}</div>` : ''}
-                            ${t.status === 'custpending' ? `
-                                <div class="info-tag">📢 Informed: ${t.informedDate || '---'}</div>
-                                <div class="info-tag">🔔 Reminders: ${t.remindCount}</div>
-                                <button class="btn-action" style="background:#e8f5e9; border:1px solid #27ae60;" onclick="incrementReminder(${t.id})">+1 Reminder</button>
-                            ` : ''}
                             <div style="margin-top:10px;">
-                                <button class="btn-action" onclick="cycleStatus(${t.id})">🔄 Status</button>
                                 <button class="btn-action" onclick="editTask(${t.id})">✏️ Edit</button>
                                 <button class="btn-action" onclick="deleteTask(${t.id})" style="color:red">🗑️</button>
                             </div>
@@ -286,6 +260,14 @@
             `;
             container.appendChild(block);
         });
+    }
+
+    function addManualTask() {
+        const date = document.getElementById('globalDate').value;
+        const title = document.getElementById('manualTitle').value;
+        if(!date || !title) return alert("Enter Date/Title");
+        db.push({ id: Date.now(), date, name: title, custId: "Manual", acc: "", phone: "", assigned: document.getElementById('manualAssign').value || "Self", remarks: "", status: "pending", informedDate: "", remindCount: 0 });
+        saveAndRender();
     }
 
     function cancelEdit() { document.getElementById('parserInputArea').style.display = 'block'; document.getElementById('editArea').style.display = 'none'; }
