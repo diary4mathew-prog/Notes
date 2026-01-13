@@ -1,323 +1,660 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Bank Manager Pro</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bank Manager Pro</title>
+  <style>
+    :root { --bank-blue:#003366; --bg:#f0f2f5; --muted:#6c757d; --ok:#27ae60; --warn:#3498db; --violet:#9b59b6; --danger:#d63031; }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { font-family:-apple-system, system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); margin:0; padding-bottom:200px; color:#111; }
 
-<style>
-:root{
-  --bank-blue:#003366;
-  --bg:#f0f2f5;
-  --ok:#27ae60;
-  --warn:#3498db;
-  --violet:#9b59b6;
-  --danger:#d63031;
-}
+    /* BOTTOM NAV MOVED UP */
+    .bottom-nav{
+      position:fixed;
+      bottom:60px;  /* moved up */
+      left:5%;
+      width:90%;
+      background:#fff;
+      display:flex;
+      border-radius:15px;
+      height:54px;
+      z-index:1000;
+      box-shadow:0 4px 15px rgba(0,0,0,0.2);
+      border:1px solid #ddd;
+      overflow:hidden;
+    }
+    .nav-item { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; color:#888; border:none; background:none; font-weight:900; }
+    .nav-item.active { color: var(--bank-blue); }
 
-*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    .page { display:none; padding:8px; }
+    .page.active { display:block; }
 
-body{
-  font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
-  background:var(--bg);
-  margin:0;
-  padding-bottom:180px; /* EXTRA SPACE FOR FLOATING NAV */
-  color:#111;
-}
+    .card { background:#fff; border-radius:12px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:8px; border:1px solid #e9ecef; }
+    .input-box { width:100%; border:1px solid #ccc; border-radius:8px; padding:9px; font-size:14px; margin-bottom:6px; outline:none; }
+    .input-box:focus{ border-color:#9bb7d3; box-shadow:0 0 0 2px rgba(0,51,102,0.08); }
 
-/* ---------- BOTTOM NAV (MOVED UP) ---------- */
-.bottom-nav{
-  position:fixed;
-  bottom:50px;               /* << MOVED UP */
-  left:5%;
-  width:90%;
-  height:54px;
-  background:#fff;
-  display:flex;
-  border-radius:16px;
-  z-index:1000;
-  box-shadow:0 6px 18px rgba(0,0,0,0.25);
-  border:1px solid #ddd;
-}
+    .top-row{ display:flex; gap:6px; }
+    .mini-row{ display:flex; gap:6px; }
+    .btn-add { background:var(--bank-blue); color:#fff; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; }
+    .btn-ghost{ background:#eef2f7; color:#102a43; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; }
+    .btn-danger{ background:var(--danger); color:#fff; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; }
+    .btn-add:active, .btn-ghost:active, .btn-danger:active { transform:scale(0.99); }
 
-.nav-item{
-  flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:13px;
-  font-weight:800;
-  color:#888;
-  border:none;
-  background:none;
-}
+    .date-header { background:#dee2e6; padding:8px 12px; font-weight:900; border-radius:10px; display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:6px; border:1px solid #cfd4da; cursor:pointer; }
+    .date-sub{ font-weight:800; color:#243b53; font-size:11px; opacity:0.9; display:flex; gap:10px; align-items:center; margin-top:4px; flex-wrap:wrap; }
+    .pill{ display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:999px; border:1px solid rgba(0,0,0,0.08); background:#f8f9fa; }
+    .pill b{ font-size:11px; }
+    .pill .dot{ width:8px; height:8px; border-radius:999px; display:inline-block; }
+    .dot-p{ background:#c0c0c0; }
+    .dot-pr{ background:var(--warn); }
+    .dot-cp{ background:var(--violet); }
+    .dot-d{ background:var(--ok); }
 
-.nav-item.active{ color:var(--bank-blue); }
+    .task-item { border-left:5px solid #ccc; padding:8px 10px; margin:6px 0; background:#fff; border-radius:10px; border:1px solid #eee; }
+    .status-completed { border-left-color: var(--ok); background:#f0fff4; }
+    .status-custpending { border-left-color: var(--violet); background:#faf5ff; }
+    .status-processing { border-left-color: var(--warn); background:#f2f8ff; }
+    .status-pending{ border-left-color:#b0b0b0; background:#fff; }
 
-/* ---------- PAGES ---------- */
-.page{ display:none; padding:8px; }
-.page.active{ display:block; }
+    .task-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+    .task-name { font-size:14px; font-weight:900; color: var(--bank-blue); line-height:1.2; }
+    .task-meta { font-size:11px; color:#555; margin:3px 0; }
+    .rem-text { font-size:11px; color:#555; font-style:italic; border-top:1px dotted #ccc; margin-top:6px; padding-top:5px; white-space:pre-wrap; }
 
-/* ---------- CARDS ---------- */
-.card{
-  background:#fff;
-  border-radius:12px;
-  padding:10px;
-  margin-bottom:8px;
-  border:1px solid #e5e5e5;
-  box-shadow:0 1px 3px rgba(0,0,0,0.1);
-}
+    .sym-btn-row { display:flex; gap:14px; margin-top:8px; justify-content:flex-end; border-top:1px solid rgba(0,0,0,0.04); padding-top:6px; }
+    .sym-btn { background:none; border:none; font-size:18px; padding:0; cursor:pointer; }
+    .sym-btn:active{ transform:scale(0.96); }
 
-.input-box{
-  width:100%;
-  border:1px solid #ccc;
-  border-radius:8px;
-  padding:9px;
-  font-size:14px;
-  margin-bottom:6px;
-}
+    .btn-email { background:#495057; color:#fff; width:100%; border-radius:10px; padding:10px; border:none; font-weight:900; margin-top:10px; font-size:12px; }
 
-.btn-add{
-  background:var(--bank-blue);
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  padding:10px;
-  width:100%;
-  font-weight:900;
-}
+    .help{ font-size:12px; color:var(--muted); margin-top:4px; }
+    .small{ font-size:11px; color:#6c757d; font-weight:800; }
 
-.btn-add:active{ transform:scale(0.98); }
+    .kpi-grid{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px; }
+    .kpi{ background:#f8f9fa; border:1px solid #e9ecef; border-radius:12px; padding:10px; }
+    .kpi .v{ font-size:18px; font-weight:900; color:#111; }
+    .kpi .l{ font-size:11px; color:#6c757d; font-weight:800; margin-top:2px; }
 
-/* ---------- TASK LIST ---------- */
-.date-header{
-  background:#dee2e6;
-  padding:8px 12px;
-  font-weight:900;
-  border-radius:10px;
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:6px;
-  border:1px solid #cfd4da;
-  cursor:pointer;
-}
+    .row-right{ display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+    .badge{ font-size:10px; font-weight:900; padding:3px 7px; border-radius:999px; border:1px solid rgba(0,0,0,0.1); background:#fff; color:#333; }
 
-.task-item{
-  background:#fff;
-  border-radius:10px;
-  padding:8px 10px;
-  margin:6px 0;
-  border-left:5px solid #bbb;
-  border:1px solid #eee;
-}
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; z-index:2000;
+      align-items:center; justify-content:center; padding:14px;
+    }
+    .modal{ width:min(520px, 100%); background:#fff; border-radius:14px; padding:12px; border:1px solid #e9ecef; box-shadow:0 10px 30px rgba(0,0,0,0.25); }
+    .modal h3{ margin:0 0 10px 0; color:var(--bank-blue); font-size:16px; }
+    .modal .actions{ display:flex; gap:8px; margin-top:10px; }
+    .modal .actions button{ flex:1; }
 
-.status-pending{ border-left-color:#bbb; }
-.status-processing{ border-left-color:var(--warn); background:#f2f8ff; }
-.status-custpending{ border-left-color:var(--violet); background:#faf5ff; }
-.status-completed{ border-left-color:var(--ok); background:#f0fff4; }
-
-.task-name{
-  font-size:14px;
-  font-weight:900;
-  color:var(--bank-blue);
-}
-
-.task-meta{
-  font-size:11px;
-  color:#555;
-}
-
-.rem-text{
-  font-size:11px;
-  color:#555;
-  font-style:italic;
-  border-top:1px dotted #ccc;
-  margin-top:6px;
-  padding-top:4px;
-}
-
-.sym-btn-row{
-  display:flex;
-  gap:14px;
-  justify-content:flex-end;
-  margin-top:6px;
-}
-
-.sym-btn{
-  background:none;
-  border:none;
-  font-size:18px;
-}
-
-/* ---------- TOAST ---------- */
-.toast{
-  position:fixed;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:150px;              /* ABOVE NAV */
-  background:#111;
-  color:#fff;
-  padding:10px 14px;
-  border-radius:14px;
-  font-size:12px;
-  display:none;
-  z-index:2000;
-}
-</style>
+    .toast{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:165px; /* moved up to sit above higher nav */
+      background:#111; color:#fff; padding:10px 12px; border-radius:12px;
+      font-size:12px; display:none; z-index:3000; box-shadow:0 8px 20px rgba(0,0,0,0.3);
+      max-width:90%; text-align:center;
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- ================= TASK PAGE ================= -->
-<div id="taskPage" class="page active">
+  <!-- TASKS -->
+  <div id="taskPage" class="page active">
+    <div class="card" style="background:#fff9c4; border:1px solid #fbc02d;">
+      <div class="top-row">
+        <input type="date" id="globalDate" class="input-box" style="flex:1" />
+        <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name" style="flex:2" />
+      </div>
 
-  <div class="card" style="background:#fff9c4;border:1px solid #fbc02d;">
-    <div style="display:flex;gap:6px;">
-      <input type="date" id="globalDate" class="input-box" style="flex:1">
-      <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name" style="flex:2">
-    </div>
-    <button class="btn-add" onclick="addManualTask()">+ QUICK ADD</button>
-  </div>
+      <div class="mini-row">
+        <button class="btn-add" onclick="addManualTask()">+ QUICK ADD</button>
+        <button class="btn-ghost" onclick="openBackup()">⬇︎ Backup / Restore</button>
+      </div>
 
-  <div id="taskContainer"></div>
-</div>
-
-<!-- ================= PARSER PAGE ================= -->
-<div id="parsePage" class="page">
-
-  <div class="card" id="parserInputArea">
-    <textarea id="rawInput" class="input-box" style="height:110px;" placeholder="ID Acc Name Phone Remarks / Next..."></textarea>
-    <button class="btn-add" onclick="bulkOrSingleParse()">PROCESS ( / )</button>
-  </div>
-
-  <div id="editArea" class="card" style="display:none;background:#e3f2fd;">
-    <input type="hidden" id="editTaskId">
-
-    <div style="display:flex;gap:6px;">
-      <input id="editCustId" class="input-box" placeholder="ID">
-      <input id="editAcc" class="input-box" placeholder="Acc">
+      <div class="help">Tip: Select date first. Quick Add creates a minimal Pending entry (edit later for details).</div>
     </div>
 
-    <input id="editName" class="input-box" placeholder="Name">
-    <input id="editPhone" class="input-box" placeholder="Phone">
+    <div class="card">
+      <input id="searchBox" class="input-box" placeholder="Search (name / phone / acc / ID / remarks)..." oninput="renderTasks()" />
+      <div class="kpi-grid">
+        <div class="kpi"><div class="v" id="kpiTotal">0</div><div class="l">Total tasks (all dates)</div></div>
+        <div class="kpi"><div class="v" id="kpiToday">0</div><div class="l">Today’s tasks</div></div>
+      </div>
+    </div>
 
-    <select id="editStatus" class="input-box">
-      <option value="pending">Pending</option>
-      <option value="processing">Processing</option>
-      <option value="custpending">Cust-Pending</option>
-      <option value="completed">Completed</option>
-    </select>
-
-    <textarea id="editRemarks" class="input-box" placeholder="Remarks"></textarea>
-
-    <button class="btn-add" onclick="commitTask()">SAVE</button>
-    <button class="btn-add" style="background:#888;margin-top:6px;" onclick="cancelEdit()">CANCEL</button>
+    <div id="taskContainer"></div>
   </div>
-</div>
 
-<!-- ================= BOTTOM NAV ================= -->
-<nav class="bottom-nav">
-  <button class="nav-item active" onclick="switchPage('taskPage',this)">📋 TASKS</button>
-  <button class="nav-item" onclick="switchPage('parsePage',this)">🔍 PARSER</button>
-</nav>
+  <!-- PARSER -->
+  <div id="parsePage" class="page">
+    <div class="card" id="parserInputArea">
+      <textarea id="rawInput" class="input-box" style="height:110px;" placeholder="Paste: ID Acc Name Phone Remarks / Next record..."></textarea>
+      <button class="btn-add" onclick="bulkOrSingleParse()">PROCESS ( / )</button>
+      <div class="help">
+        Parsing rule: ID (1st), Acc (2nd), Name (alpha), then number tokens (digits or +digits) consecutively, then remarks.
+      </div>
+    </div>
 
-<div id="toast" class="toast"></div>
+    <div id="editArea" class="card" style="display:none; background:#e3f2fd;">
+      <h3 style="margin:0 0 10px 0; color:var(--bank-blue)">Edit Details</h3>
+      <input type="hidden" id="editTaskId" />
+
+      <div class="top-row">
+        <input type="text" id="editCustId" class="input-box" placeholder="ID" />
+        <input type="text" id="editAcc" class="input-box" placeholder="Acc No" />
+      </div>
+
+      <input type="text" id="editName" class="input-box" placeholder="Full Name" />
+      <input type="text" id="editPhone" class="input-box" placeholder="Phone / Mobile" />
+
+      <select id="editStatus" class="input-box">
+        <option value="pending">Pending</option>
+        <option value="processing">Processing</option>
+        <option value="custpending">Cust-Pending</option>
+        <option value="completed">Completed</option>
+      </select>
+
+      <textarea id="editRemarks" class="input-box" placeholder="Full Remarks..." style="height:90px;"></textarea>
+
+      <button class="btn-add" style="background:var(--ok)" onclick="commitTask()">SAVE CHANGES</button>
+      <button class="btn-ghost" style="margin-top:6px;" onclick="cancelEdit()">CANCEL</button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchPage('taskPage', this)">📋 TASKS</button>
+    <button class="nav-item" onclick="switchPage('parsePage', this)">🔍 PARSER</button>
+  </nav>
+
+  <!-- Move Modal -->
+  <div id="moveModal" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'moveModal')">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3>Move task to date</h3>
+      <input type="hidden" id="moveUid" />
+      <input type="date" id="moveDate" class="input-box" />
+      <div class="actions">
+        <button class="btn-ghost" onclick="closeModal('moveModal')">Cancel</button>
+        <button class="btn-add" onclick="confirmMove()">Move</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup Modal -->
+  <div id="backupModal" class="modal-backdrop" onclick="closeModalOnBackdrop(event, 'backupModal')">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3>Backup / Restore</h3>
+
+      <div class="mini-row">
+        <button class="btn-add" onclick="downloadBackup()">Download JSON</button>
+        <button class="btn-ghost" onclick="copyBackup()">Copy JSON</button>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <textarea id="restoreBox" class="input-box" style="height:120px;" placeholder="Paste backup JSON here to restore..."></textarea>
+
+      <div class="actions">
+        <button class="btn-danger" onclick="clearAllTasks()">Clear All</button>
+        <button class="btn-add" onclick="restoreBackup()">Restore</button>
+      </div>
+
+      <div class="help">Restore replaces your current data. Keep a backup before restoring.</div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
 
 <script>
-/* ---------- DATA ---------- */
-let db = JSON.parse(localStorage.getItem('bank_tasks_v23')) || [];
+  // ========= Storage =========
+  const STORAGE_KEY = 'bank_tasks_v22';
+  let db = safeLoad();
 
-/* ---------- UTIL ---------- */
-const today = () => new Date().toISOString().slice(0,10);
-const toast = msg => {
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.style.display='block';
-  clearTimeout(t._x);
-  t._x=setTimeout(()=>t.style.display='none',1800);
-};
-
-/* ---------- NAV ---------- */
-function switchPage(p,el){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-  document.getElementById(p).classList.add('active');
-  el.classList.add('active');
-  if(p==='taskPage') render();
-}
-
-/* ---------- PARSE LOGIC ---------- */
-function parseLogic(text){
-  const w=text.trim().split(/\s+/);
-  const id=w[0]||"", acc=w[1]||"";
-  const isNum=s=>/^\d+$/.test(s)||/^\+\d+$/.test(s);
-
-  let i=2;
-  while(i<w.length && !isNum(w[i])) i++;
-  const n=w.slice(2,i).join(" ");
-  let j=i;
-  while(j<w.length && isNum(w[j])) j++;
-  const ph=w.slice(i,j).join("");
-  const rem=w.slice(j).join(" ");
-  return {id,acc,n,ph,rem};
-}
-
-/* ---------- CRUD ---------- */
-function addManualTask(){
-  const d=document.getElementById('globalDate').value||today();
-  const n=document.getElementById('manualTitle').value.trim();
-  if(!n) return alert("Name required");
-  db.push({uid:Date.now(),date:d,n,id:"M",acc:"M",ph:"",rem:"",status:"pending"});
-  document.getElementById('manualTitle').value="";
-  save();
-}
-
-function bulkOrSingleParse(){
-  const raw=document.getElementById('rawInput').value.trim();
-  const d=document.getElementById('globalDate').value||today();
-  if(!raw) return;
-
-  if(raw.includes('/')){
-    raw.split('/').forEach(r=>{
-      if(r.trim()) db.push({uid:Date.now()+Math.random(),date:d,...parseLogic(r),status:"pending"});
-    });
-    document.getElementById('rawInput').value="";
-    save();
-    switchPage('taskPage',document.querySelectorAll('.nav-item')[0]);
+  function safeLoad(){
+    try {
+      const x = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      return Array.isArray(x) ? x : [];
+    } catch(e){ return []; }
   }
-}
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    renderTasks();
+  }
 
-function save(){
-  localStorage.setItem('bank_tasks_v23',JSON.stringify(db));
-  render();
-}
+  // ========= Utilities =========
+  function todayISO(){
+    const d = new Date();
+    return d.toISOString().slice(0,10);
+  }
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => t.style.display='none', 1800);
+  }
+  function makeUid(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return String(Date.now()) + '_' + String(Math.random()).slice(2);
+  }
+  function escapeHtml(s){
+    return String(s ?? '')
+      .replaceAll('&','&amp;').replaceAll('<','&lt;')
+      .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
+  }
+  function statusIcon(st){
+    if (st === 'completed') return '✅';
+    if (st === 'custpending') return '🟣';
+    if (st === 'processing') return '🔵';
+    return '⏳';
+  }
+  function normalizeForSearch(t){
+    return [t.date, t.n, t.id, t.acc, t.ph, t.rem, t.status].join(' ').toLowerCase();
+  }
+  function ensureDateSelected(){
+    const d = document.getElementById('globalDate').value;
+    if (!d) {
+      document.getElementById('globalDate').value = todayISO();
+      return document.getElementById('globalDate').value;
+    }
+    return d;
+  }
 
-/* ---------- RENDER ---------- */
-function render(){
-  const c=document.getElementById('taskContainer');
-  c.innerHTML="";
-  const g={};
-  db.forEach(t=>(g[t.date]=g[t.date]||[]).push(t));
+  // ========= Navigation =========
+  function switchPage(p, el){
+    document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    document.getElementById(p).classList.add('active');
+    if (el) el.classList.add('active');
+    if (p === 'taskPage') renderTasks();
+  }
 
-  Object.keys(g).sort().reverse().forEach(d=>{
-    c.innerHTML+=`
-      <div class="date-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-        <span>📅 ${d}</span><span>${g[d].length}</span>
+  // ========= Parsing (Your rule) =========
+  // ID (1st), Acc (2nd), Name until first number token, then number tokens (digits OR +digits) consecutively, then remarks
+  function parseLogic(text){
+    const w = text.trim().split(/\s+/);
+    const id  = w[0] || "";
+    const acc = w[1] || "";
+
+    const isNumberToken = (s) => /^\d+$/.test(s) || /^\+\d+$/.test(s);
+
+    let numStart = -1;
+    for (let i = 2; i < w.length; i++){
+      if (isNumberToken(w[i])) { numStart = i; break; }
+    }
+
+    if (numStart === -1){
+      return { id, acc, n: w.slice(2).join(' ').trim(), ph: "", rem: "" };
+    }
+
+    const n = w.slice(2, numStart).join(' ').trim();
+
+    let numEnd = numStart;
+    while (numEnd < w.length && isNumberToken(w[numEnd])) numEnd++;
+
+    const ph = w.slice(numStart, numEnd).join('').trim();
+    const rem = w.slice(numEnd).join(' ').trim();
+
+    return { id, acc, n, ph, rem };
+  }
+
+  // ========= Tasks Rendering =========
+  function renderTasks(){
+    document.getElementById('kpiTotal').textContent = db.length;
+    const tdy = todayISO();
+    document.getElementById('kpiToday').textContent = db.filter(x => x.date === tdy).length;
+
+    const container = document.getElementById('taskContainer');
+    const q = (document.getElementById('searchBox').value || '').trim().toLowerCase();
+    container.innerHTML = "";
+
+    const grouped = {};
+    for (const t of db){
+      if (q && !normalizeForSearch(t).includes(q)) continue;
+      (grouped[t.date] ||= []).push(t);
+    }
+
+    const dates = Object.keys(grouped).sort().reverse();
+    if (!dates.length){
+      container.innerHTML = `<div class="card"><div class="small">No tasks found.</div></div>`;
+      return;
+    }
+
+    const openDate = q ? null : (grouped[tdy] ? tdy : dates[0]);
+
+    for (const date of dates){
+      const tasks = grouped[date];
+
+      const cPending = tasks.filter(x => x.status === 'pending').length;
+      const cProc    = tasks.filter(x => x.status === 'processing').length;
+      const cCust    = tasks.filter(x => x.status === 'custpending').length;
+      const cDone    = tasks.filter(x => x.status === 'completed').length;
+
+      const order = { pending:0, processing:1, custpending:2, completed:3 };
+      tasks.sort((a,b) => (order[a.status] ?? 9) - (order[b.status] ?? 9) || String(a.n).localeCompare(String(b.n)));
+
+      const isOpen = (date === openDate);
+
+      container.innerHTML += `
+        <div class="date-header" onclick="toggleGroup(this)">
+          <div>
+            <div>📅 ${escapeHtml(date)}</div>
+            <div class="date-sub">
+              <span class="pill"><span class="dot dot-p"></span><b>${cPending}</b><span class="small">Pending</span></span>
+              <span class="pill"><span class="dot dot-pr"></span><b>${cProc}</b><span class="small">Processing</span></span>
+              <span class="pill"><span class="dot dot-cp"></span><b>${cCust}</b><span class="small">Cust</span></span>
+              <span class="pill"><span class="dot dot-d"></span><b>${cDone}</b><span class="small">Done</span></span>
+            </div>
+          </div>
+          <div class="row-right">
+            <span class="badge">${tasks.length} items</span>
+            <span class="badge">${isOpen ? '▲' : '▼'}</span>
+          </div>
+        </div>
+        <div class="group-body" style="display:${isOpen ? 'block' : 'none'}">
+          ${tasks.map(t => taskCard(t)).join('')}
+          <button class="btn-email" onclick="emailReport('${escapeHtml(date)}')">📧 SEND DETAILED REPORT (${escapeHtml(date)})</button>
+        </div>
+      `;
+    }
+  }
+
+  function toggleGroup(headerEl){
+    const body = headerEl.nextElementSibling;
+    const badge = headerEl.querySelectorAll('.badge')[1];
+    const isNowOpen = body.style.display === 'none';
+    body.style.display = isNowOpen ? 'block' : 'none';
+    if (badge) badge.textContent = isNowOpen ? '▲' : '▼';
+  }
+
+  function taskCard(t){
+    const safeName = escapeHtml(t.n || '');
+    const safeId   = escapeHtml(t.id || '');
+    const safeAcc  = escapeHtml(t.acc || '');
+    const safePh   = escapeHtml(t.ph || '');
+    const safeRem  = escapeHtml(t.rem || '');
+    const icon = statusIcon(t.status);
+
+    const callBtn = t.ph ? `<button class="sym-btn" title="Call" onclick="callNumber('${escapeHtml(t.uid)}')">📞</button>` : '';
+
+    return `
+      <div class="task-item status-${escapeHtml(t.status || 'pending')}">
+        <div class="task-row">
+          <div style="min-width:0;">
+            <div class="task-name" title="${safeName}">${safeName || '(No Name)'}</div>
+            <div class="task-meta">ID: ${safeId} | A/c: ${safeAcc} | Phone: ${safePh}</div>
+          </div>
+          <div style="font-size:12px; font-weight:900;">${icon}</div>
+        </div>
+        ${t.rem ? `<div class="rem-text">Rem: ${safeRem}</div>` : ''}
+        <div class="sym-btn-row">
+          <button class="sym-btn" title="Copy" onclick="copyTask('${escapeHtml(t.uid)}')">📋</button>
+          ${callBtn}
+          <button class="sym-btn" title="Edit" onclick="editTask('${escapeHtml(t.uid)}')">✏️</button>
+          <button class="sym-btn" title="Move" onclick="openMove('${escapeHtml(t.uid)}')">📅</button>
+          <button class="sym-btn" title="Delete" onclick="deleteTask('${escapeHtml(t.uid)}')">🗑️</button>
+        </div>
       </div>
-      <div style="display:block">
-        ${g[d].map(t=>`
-          <div class="task-item status-${t.status}">
-            <div class="task-name">${t.n}</div>
-            <div class="task-meta">ID:${t.id} | Acc:${t.acc} | ${t.ph}</div>
-            ${t.rem?`<div class="rem-text">${t.rem}</div>`:""}
-          </div>`).join("")}
-      </div>`;
-  });
-}
+    `;
+  }
 
-/* ---------- INIT ---------- */
-document.getElementById('globalDate').value=today();
-render();
+  // ========= CRUD =========
+  function addManualTask(){
+    const date = ensureDateSelected();
+    const name = (document.getElementById('manualTitle').value || '').trim();
+    if (!name) return alert("Date & Name required");
+
+    db.push({ uid: makeUid(), date, n:name, id:"M", acc:"M", ph:"", rem:"", status:"pending" });
+
+    document.getElementById('manualTitle').value = "";
+    save();
+    showToast("Added");
+  }
+
+  function bulkOrSingleParse(){
+    const raw = (document.getElementById('rawInput').value || '').trim();
+    const date = ensureDateSelected();
+    if (!raw) return;
+
+    if (raw.includes('/')){
+      const parts = raw.split('/').map(x => x.trim()).filter(Boolean);
+      for (const r of parts){
+        const p = parseLogic(r);
+        db.push({ uid: makeUid(), date, ...p, status:"pending" });
+      }
+      document.getElementById('rawInput').value = "";
+      save();
+      switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
+      showToast(`Added ${parts.length} item(s)`);
+    } else {
+      const p = parseLogic(raw);
+      document.getElementById('editTaskId').value = "";
+      document.getElementById('editCustId').value = p.id;
+      document.getElementById('editAcc').value = p.acc;
+      document.getElementById('editName').value = p.n;
+      document.getElementById('editPhone').value = p.ph;
+      document.getElementById('editRemarks').value = p.rem;
+      document.getElementById('editStatus').value = "pending";
+
+      document.getElementById('parserInputArea').style.display = 'none';
+      document.getElementById('editArea').style.display = 'block';
+    }
+  }
+
+  function editTask(uid){
+    const t = db.find(x => x.uid == uid);
+    if (!t) return;
+
+    document.getElementById('editTaskId').value = t.uid;
+    document.getElementById('editCustId').value = t.id || "";
+    document.getElementById('editAcc').value = t.acc || "";
+    document.getElementById('editName').value = t.n || "";
+    document.getElementById('editPhone').value = t.ph || "";
+    document.getElementById('editRemarks').value = t.rem || "";
+    document.getElementById('editStatus').value = t.status || "pending";
+
+    document.getElementById('parserInputArea').style.display = 'none';
+    document.getElementById('editArea').style.display = 'block';
+    switchPage('parsePage', document.querySelectorAll('.nav-item')[1]);
+  }
+
+  function commitTask(){
+    const uid = (document.getElementById('editTaskId').value || '').trim();
+    const date = ensureDateSelected();
+
+    const data = {
+      id: (document.getElementById('editCustId').value || '').trim(),
+      acc: (document.getElementById('editAcc').value || '').trim(),
+      n: (document.getElementById('editName').value || '').trim(),
+      ph: (document.getElementById('editPhone').value || '').trim(),
+      rem: (document.getElementById('editRemarks').value || '').trim(),
+      status: document.getElementById('editStatus').value
+    };
+
+    if (!data.n){
+      if (!confirm("Name is empty. Save anyway?")) return;
+    }
+
+    if (uid){
+      db = db.map(t => t.uid == uid ? { ...t, ...data } : t);
+    } else {
+      db.push({ uid: makeUid(), date, ...data });
+      document.getElementById('rawInput').value = "";
+    }
+
+    save();
+    cancelEdit();
+    switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
+    showToast("Saved");
+  }
+
+  function cancelEdit(){
+    document.getElementById('parserInputArea').style.display = 'block';
+    document.getElementById('editArea').style.display = 'none';
+  }
+
+  function deleteTask(uid){
+    if (!confirm("Delete this task?")) return;
+    db = db.filter(t => t.uid != uid);
+    save();
+    showToast("Deleted");
+  }
+
+  // ========= Copy / Call =========
+  function copyTask(uid){
+    const t = db.find(x => x.uid == uid);
+    if (!t) return;
+
+    const txt =
+`Name: ${t.n || ""}
+ID: ${t.id || ""}
+Acc: ${t.acc || ""}
+Phone: ${t.ph || ""}
+Status: ${(t.status || "").toUpperCase()}
+Remarks: ${t.rem || ""}`.trim();
+
+    copyToClipboard(txt)
+      .then(() => showToast("Copied"))
+      .catch(() => alert("Copy failed on this browser. Try manual copy."));
+  }
+
+  function callNumber(uid){
+    const t = db.find(x => x.uid == uid);
+    if (!t || !t.ph) return;
+    const num = String(t.ph).replace(/\s+/g,'');
+    window.location.href = `tel:${num}`;
+  }
+
+  async function copyToClipboard(text){
+    if (navigator.clipboard && window.isSecureContext){
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise((resolve, reject) => {
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly','');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        ok ? resolve() : reject();
+      } catch(e){ reject(e); }
+    });
+  }
+
+  // ========= Email Report =========
+  function emailReport(date){
+    const tasks = db.filter(t => t.date === date);
+    const order = { pending:0, processing:1, custpending:2, completed:3 };
+    tasks.sort((a,b) => (order[a.status] ?? 9) - (order[b.status] ?? 9) || String(a.n).localeCompare(String(b.n)));
+
+    let body = `--- BANK TASK REPORT: ${date} ---\n\n`;
+    tasks.forEach((t, i) => {
+      body += `${i+1}. [${(t.status || '').toUpperCase()}] ${t.n || ''}\n`;
+      body += `ID: ${t.id || ''} | Acc: ${t.acc || ''} | Phone: ${t.ph || ''}\n`;
+      body += `Remarks: ${t.rem || 'None'}\n----------------\n`;
+    });
+
+    window.location.href = `mailto:?subject=${encodeURIComponent('Tasks ' + date)}&body=${encodeURIComponent(body)}`;
+  }
+
+  // ========= Move Modal =========
+  function openMove(uid){
+    const t = db.find(x => x.uid == uid);
+    if (!t) return;
+    document.getElementById('moveUid').value = uid;
+    document.getElementById('moveDate').value = t.date || todayISO();
+    openModal('moveModal');
+  }
+
+  function confirmMove(){
+    const uid = document.getElementById('moveUid').value;
+    const d = document.getElementById('moveDate').value;
+    if (!d) return alert("Select a date.");
+    db = db.map(t => t.uid == uid ? { ...t, date:d } : t);
+    save();
+    closeModal('moveModal');
+    showToast("Moved");
+  }
+
+  // ========= Backup / Restore =========
+  function openBackup(){
+    document.getElementById('restoreBox').value = "";
+    openModal('backupModal');
+  }
+
+  function downloadBackup(){
+    const data = JSON.stringify({ version:1, exportedAt:new Date().toISOString(), tasks:db }, null, 2);
+    const blob = new Blob([data], { type:'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `bank_tasks_backup_${todayISO()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast("Downloaded");
+  }
+
+  function copyBackup(){
+    const data = JSON.stringify({ version:1, exportedAt:new Date().toISOString(), tasks:db });
+    copyToClipboard(data)
+      .then(() => showToast("Backup copied"))
+      .catch(() => alert("Copy failed on this browser."));
+  }
+
+  function restoreBackup(){
+    const txt = (document.getElementById('restoreBox').value || '').trim();
+    if (!txt) return alert("Paste backup JSON first.");
+
+    try{
+      const obj = JSON.parse(txt);
+      const tasks = Array.isArray(obj) ? obj : obj.tasks;
+      if (!Array.isArray(tasks)) return alert("Invalid backup format.");
+
+      const cleaned = tasks.map(t => ({
+        uid: t.uid || makeUid(),
+        date: t.date || todayISO(),
+        n: t.n || "",
+        id: t.id || "",
+        acc: t.acc || "",
+        ph: t.ph || "",
+        rem: t.rem || "",
+        status: t.status || "pending"
+      }));
+
+      if (!confirm(`Restore will replace current data with ${cleaned.length} tasks. Continue?`)) return;
+
+      db = cleaned;
+      save();
+      closeModal('backupModal');
+      showToast("Restored");
+    } catch(e){
+      alert("Invalid JSON.");
+    }
+  }
+
+  function clearAllTasks(){
+    if (!confirm("This will permanently delete ALL tasks in this device/browser. Continue?")) return;
+    db = [];
+    save();
+    closeModal('backupModal');
+    showToast("Cleared");
+  }
+
+  // ========= Modal helpers =========
+  function openModal(id){ document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id){ document.getElementById(id).style.display = 'none'; }
+  function closeModalOnBackdrop(e, id){ if (e.target && e.target.id === id) closeModal(id); }
+
+  // ========= Init =========
+  document.getElementById('globalDate').value = todayISO();
+  renderTasks();
 </script>
 </body>
 </html>
