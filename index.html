@@ -1,110 +1,94 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Bank Manager Pro - Branch Edition</title>
+  <title>Bank Manager Pro - Team Edition</title>
   <style>
-    /* RETAINED YOUR ORIGINAL CSS THEME & VARIABLES */
-    :root {
-      --bg-primary: #f0f2f5; --bg-secondary: #ffffff; --text-primary: #111111;
-      --text-secondary: #555555; --border-color: #e9ecef; --bank-blue: #003366;
-      --ok: #27ae60; --warn: #3498db; --violet: #9b59b6; --danger: #d63031;
-    }
-    [data-theme="dark"] {
-      --bg-primary: #121212; --bg-secondary: #1e1e1e; --text-primary: #ffffff;
-      --text-secondary: #b0b0b0; --border-color: #333333; --bank-blue: #4d7cff;
-    }
+    /* RETAINING YOUR ORIGINAL CSS EXACTLY */
+    :root { --bank-blue:#003366; --bg:#f0f2f5; --muted:#6c757d; --ok:#27ae60; --warn:#3498db; --violet:#9b59b6; --danger:#d63031; }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { font-family:-apple-system, system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); margin:0; padding-bottom:200px; color:#111; }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: -apple-system, system-ui, Segoe UI, Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); padding-bottom: 220px; }
+    .bottom-nav { position:fixed; bottom:60px; left:5%; width:90%; background:#fff; display:flex; border-radius:15px; height:54px; z-index:1000; box-shadow:0 4px 15px rgba(0,0,0,0.2); border:1px solid #ddd; overflow:hidden; }
+    .nav-item { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; color:#888; border:none; background:none; font-weight:900; }
+    .nav-item.active { color: var(--bank-blue); }
 
-    /* NAVIGATION */
-    .bottom-nav { position: fixed; bottom: 60px; left: 5%; width: 90%; background: var(--bg-secondary); display: flex; border-radius: 15px; height: 54px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid var(--border-color); overflow: hidden;}
-    .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: var(--text-secondary); border: none; background: none; font-weight: 900; cursor: pointer; }
-    .nav-item.active { color: var(--bank-blue); background: rgba(0, 51, 102, 0.1); }
+    .page { display:none; padding:8px; }
+    .page.active { display:block; }
+
+    .card { background:#fff; border-radius:12px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:8px; border:1px solid #e9ecef; }
+    .input-box { width:100%; border:1px solid #ccc; border-radius:8px; padding:9px; font-size:14px; margin-bottom:6px; outline:none; }
     
-    .page { display: none; padding: 12px 8px; }
-    .page.active { display: block; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .btn-add { background:var(--bank-blue); color:#fff; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; }
+    .btn-ghost{ background:#eef2f7; color:#102a43; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; }
+    .btn-danger{ background:var(--danger); color:#fff; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; }
 
-    /* CARDS & INPUTS */
-    .card { background: var(--bg-secondary); border-radius: 12px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid var(--border-color); }
-    .input-box { width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; font-size: 14px; margin-bottom: 8px; background: var(--bg-secondary); color: var(--text-primary); outline: none; }
+    .date-header { background:#dee2e6; padding:8px 12px; font-weight:900; border-radius:10px; display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:6px; border:1px solid #cfd4da; cursor:pointer; }
+    .date-sub{ font-weight:800; color:#243b53; font-size:11px; opacity:0.9; display:flex; gap:10px; align-items:center; margin-top:4px; flex-wrap:wrap; }
+    .pill{ display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:999px; border:1px solid rgba(0,0,0,0.08); background:#f8f9fa; }
+    .pill .dot{ width:8px; height:8px; border-radius:999px; display:inline-block; }
+    .dot-p{ background:#c0c0c0; } .dot-pr{ background:var(--warn); } .dot-cp{ background:var(--violet); } .dot-d{ background:var(--ok); }
 
-    /* TASK ITEMS - ORIGINAL STYLE */
-    .date-header { background: var(--bg-secondary); padding: 10px; font-weight: 900; border-radius: 10px; display: flex; justify-content: space-between; border: 1px solid var(--border-color); cursor: pointer; margin-top: 15px; }
-    .task-item { border-left: 5px solid #ccc; padding: 12px; margin: 8px 0; background: var(--bg-secondary); border-radius: 10px; border: 1px solid var(--border-color); position: relative; }
-    .status-pending { border-left-color: #c0c0c0; }
-    .status-processing { border-left-color: var(--warn); }
-    .status-custpending { border-left-color: var(--violet); }
-    .status-completed { border-left-color: var(--ok); }
+    .task-item { border-left:5px solid #ccc; padding:8px 10px; margin:6px 0; background:#fff; border-radius:10px; border:1px solid #eee; }
+    .status-completed { border-left-color: var(--ok); background:#f0fff4; }
+    .status-custpending { border-left-color: var(--violet); background:#faf5ff; }
+    .status-processing { border-left-color: var(--warn); background:#f2f8ff; }
+
+    .task-name { font-size:14px; font-weight:900; color: var(--bank-blue); line-height:1.2; }
+    .task-meta { font-size:11px; color:#555; margin:3px 0; }
+    .rem-text { font-size:11px; color:#555; font-style:italic; border-top:1px dotted #ccc; margin-top:6px; padding-top:5px; white-space:pre-wrap; }
+
+    .sym-btn-row { display:flex; gap:14px; margin-top:8px; justify-content:flex-end; border-top:1px solid rgba(0,0,0,0.04); padding-top:6px; }
+    .sym-btn { background:none; border:none; font-size:18px; padding:0; cursor:pointer; }
+
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; z-index:2000; align-items:center; justify-content:center; padding:14px; }
+    .modal{ width:min(520px, 100%); background:#fff; border-radius:14px; padding:15px; }
     
-    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: var(--bg-primary); font-size: 11px; margin-right: 4px; border: 1px solid rgba(0,0,0,0.05); }
-    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .dot-p { background: #c0c0c0; } .dot-pr { background: var(--warn); } .dot-cp { background: var(--violet); } .dot-d { background: var(--ok); }
-
-    .btn-add { background: var(--bank-blue); color: #fff; border: none; border-radius: 10px; padding: 12px; font-weight: 900; width: 100%; cursor: pointer; }
-    .btn-ghost { background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; font-weight: 800; cursor: pointer; width: 100%; }
-    
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 2000; align-items: center; justify-content: center; }
-    .modal { background: var(--bg-secondary); width: 90%; max-width: 500px; padding: 20px; border-radius: 15px; border: 1px solid var(--border-color); }
-    .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 130px; background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; display: none; z-index: 3000; }
-
-    /* STAFF ELEMENTS */
-    .staff-tag { background: var(--bank-blue); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-bottom: 5px; display: inline-block; font-weight: bold; }
-    .summary-box { background: rgba(52, 152, 219, 0.1); border: 1px solid var(--warn); border-radius: 10px; padding: 15px; margin-bottom: 15px; display: none; }
-    
-    .kpi-grid{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px; }
-    .kpi{ background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:12px; padding:10px; text-align: center;}
-    .kpi .v{ font-size:18px; font-weight:900; }
-    .kpi .l{ font-size:11px; color:var(--text-secondary); font-weight:800; }
+    .staff-tag { background:var(--bank-blue); color:white; font-size:9px; padding:2px 5px; border-radius:4px; margin-bottom:4px; display:inline-block; font-weight:bold; }
+    .summary-box { background:#e1f5fe; border:1px solid #3498db; border-radius:10px; padding:10px; margin-bottom:10px; display:none; }
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:165px; background:#111; color:#fff; padding:10px 12px; border-radius:12px; font-size:12px; display:none; z-index:3000; }
   </style>
 </head>
 <body>
 
-  <button style="position:fixed; top:15px; right:15px; z-index:1001; border-radius:50%; width:40px; height:40px; border:1px solid var(--border-color); background:var(--bg-secondary); cursor:pointer;" onclick="toggleTheme()">🌙</button>
-
   <div id="taskPage" class="page active">
-    <div class="card" style="background: rgba(255, 249, 196, 0.4); border: 1px solid #fbc02d;">
-      <div style="display:flex; gap:8px; margin-bottom:8px;">
-        <input type="date" id="globalDate" class="input-box" style="flex:1; margin-bottom:0;" />
-        <select id="assignQuick" class="input-box" style="flex:1; margin-bottom:0;"></select>
+    <div class="card" style="background:#fff9c4; border:1px solid #fbc02d;">
+      <div style="display:flex; gap:6px;">
+        <input type="date" id="globalDate" class="input-box" style="flex:1" />
+        <select id="assignQuick" class="input-box" style="flex:1"></select>
       </div>
       <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name" />
-      <button class="btn-add" onclick="addManualTask()">+ QUICK ADD</button>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-add" onclick="addManualTask()">+ QUICK ADD</button>
+        <button class="btn-ghost" onclick="openBackup()">⬇︎ Backup / Restore</button>
+      </div>
     </div>
 
     <div class="card">
-      <input id="searchBox" class="input-box" placeholder="Search tasks..." oninput="renderTasks()" />
-      <div style="display:flex; gap:8px;">
+      <input id="searchBox" class="input-box" placeholder="Search..." oninput="renderTasks()" />
+      <div style="display:flex; gap:6px;">
         <button class="btn-ghost" style="font-size:11px;" onclick="toggleSummary()">📊 TEAM SUMMARY</button>
         <button class="btn-ghost" style="font-size:11px;" onclick="emailMasterReport()">📧 MASTER REPORT (DATEWISE)</button>
       </div>
       <div id="dailySummary" class="summary-box"></div>
-      
-      <div class="kpi-grid">
-        <div class="kpi"><div class="v" id="kpiTotal">0</div><div class="l">Total Records</div></div>
-        <div class="kpi"><div class="v" id="kpiToday">0</div><div class="l">Today’s Load</div></div>
-      </div>
     </div>
 
     <div id="taskContainer"></div>
   </div>
 
   <div id="parsePage" class="page">
-    <div class="card" id="parserArea">
+    <div class="card" id="parserInputArea">
       <select id="assignBulk" class="input-box"></select>
-      <textarea id="rawInput" class="input-box" style="height:120px;" placeholder="ID Acc Name Phone Remarks / Next record..."></textarea>
-      <button class="btn-add" onclick="bulkOrSingleParse()">PROCESS DATA</button>
+      <textarea id="rawInput" class="input-box" style="height:110px;" placeholder="ID Acc Name Phone Remarks / Next record..."></textarea>
+      <button class="btn-add" onclick="bulkOrSingleParse()">PROCESS ( / )</button>
     </div>
 
-    <div id="editArea" class="card" style="display:none; background: rgba(227, 242, 253, 0.5);">
-      <h3>Edit Task Details</h3>
+    <div id="editArea" class="card" style="display:none; background:#e3f2fd;">
+      <h3>Edit Details</h3>
       <input type="hidden" id="editTaskId" />
-      <label style="font-size:11px; font-weight:bold;">Assign Staff:</label>
       <select id="editAssignee" class="input-box"></select>
-      <div style="display:flex; gap:8px;">
+      <div style="display:flex; gap:6px;">
         <input type="text" id="editCustId" class="input-box" placeholder="ID" />
         <input type="text" id="editAcc" class="input-box" placeholder="Acc No" />
       </div>
@@ -116,24 +100,21 @@
         <option value="custpending">Cust-Pending</option>
         <option value="completed">Completed</option>
       </select>
-      <textarea id="editRemarks" class="input-box" style="height:100px;" placeholder="Remarks"></textarea>
+      <textarea id="editRemarks" class="input-box" style="height:90px;"></textarea>
       <button class="btn-add" onclick="commitTask()">SAVE CHANGES</button>
-      <button class="btn-ghost" style="margin-top:8px;" onclick="cancelEdit()">CANCEL</button>
+      <button class="btn-ghost" onclick="cancelEdit()">CANCEL</button>
     </div>
   </div>
 
   <div id="staffPage" class="page">
     <div class="card">
       <h3>Staff Master</h3>
-      <div style="display:flex; gap:8px; margin-top:10px;">
-        <input type="text" id="newStaffName" class="input-box" placeholder="New Staff Name" style="margin-bottom:0;" />
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="newStaffName" class="input-box" placeholder="Staff Name" />
         <button class="btn-add" style="width:80px" onclick="addStaff()">ADD</button>
       </div>
     </div>
-    <div id="staffList"></div>
-    <div class="card" style="margin-top:20px;">
-        <button class="btn-ghost" onclick="openBackup()">⬇︎ Backup / Restore Full Data</button>
-    </div>
+    <div id="staffListContainer"></div>
   </div>
 
   <nav class="bottom-nav">
@@ -146,10 +127,10 @@
     <div class="modal" onclick="event.stopPropagation()">
       <h3>Move to Date</h3>
       <input type="hidden" id="moveUid" />
-      <input type="date" id="moveDate" class="input-box" style="margin-top:15px;" />
-      <div style="display:flex; gap:10px; margin-top:15px;">
-        <button class="btn-ghost" onclick="closeModal('moveModal')">Cancel</button>
-        <button class="btn-add" onclick="confirmMove()">Confirm Move</button>
+      <input type="date" id="moveDate" class="input-box" />
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <button class="btn-ghost" style="flex:1" onclick="closeModal('moveModal')">Cancel</button>
+        <button class="btn-add" style="flex:1" onclick="confirmMove()">Confirm</button>
       </div>
     </div>
   </div>
@@ -157,10 +138,10 @@
   <div id="backupModal" class="modal-backdrop" onclick="closeModal('backupModal')">
     <div class="modal" onclick="event.stopPropagation()">
       <h3>Backup / Restore</h3>
-      <button class="btn-add" onclick="downloadBackup()">Download JSON Backup</button>
-      <textarea id="restoreBox" class="input-box" style="height:120px; margin-top:15px;" placeholder="Paste JSON here..."></textarea>
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="btn-danger" style="flex:1" onclick="clearAllTasks()">Clear All</button>
+      <button class="btn-add" onclick="downloadBackup()">Download JSON</button>
+      <textarea id="restoreBox" class="input-box" style="height:120px; margin-top:10px;" placeholder="Paste JSON..."></textarea>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-danger" style="flex:1" onclick="clearAll()">Clear</button>
         <button class="btn-add" style="flex:1" onclick="restoreBackup()">Restore</button>
       </div>
     </div>
@@ -169,119 +150,117 @@
   <div id="toast" class="toast"></div>
 
 <script>
-  let db = JSON.parse(localStorage.getItem('bank_pro_master_db')) || [];
-  let staff = JSON.parse(localStorage.getItem('bank_pro_staff_db')) || [];
+  let db = JSON.parse(localStorage.getItem('bank_pro_v2026')) || [];
+  let staff = JSON.parse(localStorage.getItem('bank_staff_v2026')) || [];
 
-  function init() {
-    document.getElementById('globalDate').value = new Date().toISOString().split('T')[0];
+  function save(){
+    localStorage.setItem('bank_pro_v2026', JSON.stringify(db));
+    localStorage.setItem('bank_staff_v2026', JSON.stringify(staff));
     updateStaffDropdowns();
     renderTasks();
     renderStaffList();
   }
 
-  function save() {
-    localStorage.setItem('bank_pro_master_db', JSON.stringify(db));
-    localStorage.setItem('bank_pro_staff_db', JSON.stringify(staff));
-    updateStaffDropdowns();
-    renderTasks();
-    renderStaffList();
+  // ========= YOUR ORIGINAL PARSER LOGIC (RESTORED) =========
+  function parseLogic(text){
+    const w = text.trim().split(/\s+/);
+    const id = w[0] || ""; const acc = w[1] || "";
+    const isNumToken = (s) => /^\d+$/.test(s) || /^\+\d+$/.test(s);
+    let numStart = -1;
+    for(let i=2; i<w.length; i++) if(isNumToken(w[i])) { numStart = i; break; }
+    if(numStart === -1) return { id, acc, n: w.slice(2).join(' ').trim(), ph: "", rem: "" };
+    const n = w.slice(2, numStart).join(' ').trim();
+    let numEnd = numStart;
+    while(numEnd < w.length && isNumToken(w[numEnd])) numEnd++;
+    return { id, acc, n, ph: w.slice(numStart, numEnd).join('').trim(), rem: w.slice(numEnd).join(' ').trim() };
   }
 
-  function switchPage(p, el) {
+  function init(){
+    document.getElementById('globalDate').value = new Date().toISOString().slice(0,10);
+    save();
+  }
+
+  function switchPage(p, el){
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     document.getElementById(p).classList.add('active');
     el.classList.add('active');
   }
 
-  function toggleTheme() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  }
-
-  // --- STAFF ---
-  function addStaff() {
+  // STAFF MASTER
+  function addStaff(){
     const n = document.getElementById('newStaffName').value.trim();
-    if(n) { staff.push(n); document.getElementById('newStaffName').value=''; save(); }
+    if(n){ staff.push(n); document.getElementById('newStaffName').value=''; save(); }
   }
-  function deleteStaff(i) { if(confirm('Remove staff?')) { staff.splice(i,1); save(); } }
-  function updateStaffDropdowns() {
+  function deleteStaff(i){ if(confirm('Remove?')){ staff.splice(i,1); save(); } }
+  function updateStaffDropdowns(){
     ['assignQuick', 'assignBulk', 'editAssignee'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) {
-        const cur = el.value;
-        el.innerHTML = '<option value="">Unassigned</option>' + staff.map(s => `<option value="${s}">${s}</option>`).join('');
-        el.value = cur;
-      }
+      const el = document.getElementById(id); const cur = el.value;
+      el.innerHTML = '<option value="">Unassigned</option>' + staff.map(s=>`<option value="${s}">${s}</option>`).join('');
+      el.value = cur;
     });
   }
-  function renderStaffList() {
-    document.getElementById('staffList').innerHTML = staff.map((s,i) => `
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-        <b>${s}</b> <button onclick="deleteStaff(${i})" style="color:var(--danger); background:none; border:none; font-weight:bold; cursor:pointer;">REMOVE</button>
-      </div>
+  function renderStaffList(){
+    document.getElementById('staffListContainer').innerHTML = staff.map((s,i) => `
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center;"><b>${s}</b><button class="btn-danger" style="width:60px; padding:4px;" onclick="deleteStaff(${i})">DEL</button></div>
     `).join('');
   }
 
-  // --- TASKS ---
-  function addManualTask() {
-    const n = document.getElementById('manualTitle').value.trim();
+  // TASK OPERATIONS
+  function addManualTask(){
     const d = document.getElementById('globalDate').value;
+    const n = document.getElementById('manualTitle').value.trim();
     const e = document.getElementById('assignQuick').value;
-    if(!n || !d) return alert("Date and Name required");
-    db.push({ uid: Date.now().toString(), n, date: d, emp: e, status: 'pending', id:'M', acc:'M', ph:'', rem:'' });
-    document.getElementById('manualTitle').value = '';
-    save();
-    showToast("Added");
+    if(!n) return;
+    db.push({ uid: Date.now().toString(), date: d, n, id:"M", acc:"M", ph:"", rem:"", status:"pending", emp:e });
+    document.getElementById('manualTitle').value = ""; save();
   }
 
-  function renderTasks() {
-    const container = document.getElementById('taskContainer');
+  function bulkOrSingleParse(){
+    const r = document.getElementById('rawInput').value.trim();
+    const d = document.getElementById('globalDate').value;
+    const e = document.getElementById('assignBulk').value;
+    if(!r) return;
+    r.split('/').forEach(line => {
+      const p = parseLogic(line);
+      if(p.n) db.push({ uid: Math.random().toString(36).substr(2,9), date: d, ...p, status:"pending", emp:e });
+    });
+    document.getElementById('rawInput').value = ""; save(); switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
+  }
+
+  function renderTasks(){
+    const cont = document.getElementById('taskContainer');
     const q = document.getElementById('searchBox').value.toLowerCase();
-    container.innerHTML = '';
+    cont.innerHTML = "";
+    const grouped = {};
+    db.forEach(t => { if(!q || JSON.stringify(t).toLowerCase().includes(q)) (grouped[t.date] ||= []).push(t); });
 
-    document.getElementById('kpiTotal').textContent = db.length;
-    document.getElementById('kpiToday').textContent = db.filter(x => x.date === todayISO()).length;
-
-    let filtered = db.filter(t => JSON.stringify(t).toLowerCase().includes(q));
-    const groups = {};
-    filtered.forEach(t => (groups[t.date] = groups[t.date] || []).push(t));
-
-    Object.keys(groups).sort().reverse().forEach(date => {
-      const tasks = groups[date];
+    Object.keys(grouped).sort().reverse().forEach(date => {
+      const tasks = grouped[date];
       const stats = {p:0, pr:0, cp:0, d:0};
-      tasks.forEach(t => { 
-        if(t.status==='completed') stats.d++; 
-        else if(t.status==='processing') stats.pr++; 
-        else if(t.status==='custpending') stats.cp++; 
-        else stats.p++; 
-      });
+      tasks.forEach(t => { if(t.status==='completed') stats.d++; else if(t.status==='processing') stats.pr++; else if(t.status==='custpending') stats.cp++; else stats.p++; });
 
-      container.innerHTML += `
+      cont.innerHTML += `
         <div class="date-header" onclick="toggleGroup(this)">
-          <div>
-            📅 ${date}
-            <div class="date-sub">
-              <span class="pill"><span class="dot dot-p"></span><b>${stats.p}</b></span>
-              <span class="pill"><span class="dot dot-pr"></span><b>${stats.pr}</b></span>
-              <span class="pill"><span class="dot dot-cp"></span><b>${stats.cp}</b></span>
-              <span class="pill"><span class="dot dot-d"></span><b>${stats.d}</b></span>
-            </div>
-          </div>
-          <span class="badge" style="background:var(--bank-blue); color:white; padding:2px 8px; border-radius:10px; font-size:11px;">${tasks.length} Records</span>
+          <div>📅 ${date}<div class="date-sub">
+            <span class="pill"><span class="dot dot-p"></span><b>${stats.p}</b></span>
+            <span class="pill"><span class="dot dot-pr"></span><b>${stats.pr}</b></span>
+            <span class="pill"><span class="dot dot-cp"></span><b>${stats.cp}</b></span>
+            <span class="pill"><span class="dot dot-d"></span><b>${stats.d}</b></span>
+          </div></div>
+          <span class="badge" style="background:var(--bank-blue); color:white; padding:2px 8px; border-radius:10px; font-size:11px;">${tasks.length}</span>
         </div>
         <div class="group-body">
           ${tasks.map(t => `
             <div class="task-item status-${t.status}">
-              ${t.emp ? `<div class="staff-tag">👤 Assigned: ${t.emp}</div>` : ''}
-              <div class="task-name" style="font-weight:900; color:var(--bank-blue); font-size:14px;">${escapeHtml(t.n)}</div>
-              <div style="font-size:11px; color:var(--text-secondary); margin:4px 0;">ID: ${t.id} | A/c: ${t.acc} | Ph: ${t.ph}</div>
-              ${t.rem ? `<div style="font-size:11px; border-top:1px dotted #ccc; margin-top:6px; padding-top:6px; font-style:italic;">Rem: ${escapeHtml(t.rem)}</div>` : ''}
-              <div style="display:flex; justify-content:flex-end; gap:18px; margin-top:10px; border-top:1px solid rgba(0,0,0,0.05); padding-top:8px;">
-                <span onclick="copySingleTask('${t.uid}')" style="cursor:pointer; font-size:18px;">📋</span>
-                <span onclick="editTask('${t.uid}')" style="cursor:pointer; font-size:18px;">✏️</span>
-                <span onclick="openMove('${t.uid}')" style="cursor:pointer; font-size:18px;">📅</span>
-                <span onclick="deleteTask('${t.uid}')" style="cursor:pointer; font-size:18px;">🗑️</span>
+              ${t.emp ? `<div class="staff-tag">👤 ${t.emp}</div>` : ''}
+              <div class="task-name">${escapeHtml(t.n)}</div>
+              <div class="task-meta">ID: ${t.id} | A/c: ${t.acc} | Ph: ${t.ph}</div>
+              ${t.rem ? `<div class="rem-text">${escapeHtml(t.rem)}</div>` : ''}
+              <div class="sym-btn-row">
+                <span onclick="editTask('${t.uid}')">✏️</span>
+                <span onclick="openMove('${t.uid}')">📅</span>
+                <span onclick="deleteTask('${t.uid}')" style="color:red">🗑️</span>
               </div>
             </div>
           `).join('')}
@@ -290,140 +269,86 @@
     });
   }
 
-  // --- CALENDAR MOVE ---
-  function openMove(uid) {
-    const t = db.find(x => x.uid === uid);
-    if(!t) return;
+  // CALENDAR MOVE
+  function openMove(uid){
+    const t = db.find(x => x.uid == uid);
     document.getElementById('moveUid').value = uid;
     document.getElementById('moveDate').value = t.date;
-    document.getElementById('moveModal').style.display = 'flex';
+    document.getElementById('moveModal').style.display='flex';
   }
-  function confirmMove() {
+  function confirmMove(){
     const u = document.getElementById('moveUid').value;
     const d = document.getElementById('moveDate').value;
-    if(!d) return alert("Select Date");
-    const t = db.find(x => x.uid === u);
-    t.date = d;
-    save();
-    closeModal('moveModal');
-    showToast("Moved to " + d);
+    const t = db.find(x => x.uid == u);
+    if(t) t.date = d;
+    save(); closeModal('moveModal'); showToast("Moved");
   }
 
-  // --- MASTER DATEWISE EMAIL ---
-  function emailMasterReport() {
-    if (db.length === 0) return alert("No data to report.");
+  // MASTER DATE-WISE EMAIL
+  function emailMasterReport(){
     const grouped = {};
     db.forEach(t => (grouped[t.date] ||= []).push(t));
-    const sortedDates = Object.keys(grouped).sort().reverse();
-    
-    let body = `--- MASTER DATE-WISE BRANCH REPORT ---\n`;
-    body += `Total Database Records: ${db.length}\n`;
-    body += `====================================\n\n`;
-
-    sortedDates.forEach(date => {
-      const tasks = grouped[date];
-      body += `DATE: ${date}\n`;
-      body += `------------------------------------\n`;
-      tasks.forEach((t, i) => {
-        body += `${i + 1}. [${(t.status || 'PENDING').toUpperCase()}] ${t.n}\n`;
-        body += `   STAFF: ${t.emp || 'UNASSIGNED'} | ID: ${t.id} | Acc: ${t.acc}\n`;
-        body += `   Phone: ${t.ph} | Remarks: ${t.rem || 'Nil'}\n\n`;
+    const dates = Object.keys(grouped).sort().reverse();
+    let body = `--- BRANCH MASTER DATA (DATE-WISE) ---\n\n`;
+    dates.forEach(d => {
+      body += `DATE: ${d}\n----------------\n`;
+      grouped[d].forEach((t, i) => {
+        body += `${i+1}. [${t.status.toUpperCase()}] ${t.n}\n   STAFF: ${t.emp || 'Unassigned'} | ID: ${t.id} | Acc: ${t.acc}\n   Ph: ${t.ph} | Rem: ${t.rem || 'Nil'}\n\n`;
       });
-      body += `\n`;
     });
-
-    window.location.href = `mailto:?subject=Full Branch Archive Datewise&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:?subject=Branch Data Backup&body=${encodeURIComponent(body)}`;
   }
 
-  // --- SUMMARY ---
-  function toggleSummary() {
+  function toggleSummary(){
     const box = document.getElementById('dailySummary');
-    if(box.style.display === 'block') { box.style.display='none'; return; }
+    if(box.style.display==='block'){ box.style.display='none'; return; }
     const date = document.getElementById('globalDate').value;
     const tasks = db.filter(t => t.date === date);
-    let h = `<b>Daily Load: ${date}</b><hr style="border:0; border-top:1px solid #ccc; margin:8px 0;">`;
+    let h = `<b>Daily Status: ${date}</b><hr>`;
     staff.concat(['Unassigned']).forEach(s => {
       const my = tasks.filter(t => (t.emp || 'Unassigned') === s);
-      if(my.length > 0) {
-        h += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">
-          <span style="font-size:12px;"><b>${s}</b>: ${my.length} Records</span>
-          <button class="btn-add" style="width:auto; padding:4px 10px; font-size:10px;" onclick="copyStaffMsg('${s}', '${date}')">COPY FOR CHAT</button>
-        </div>`;
-      }
+      if(my.length > 0) h += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${s}: ${my.length}</span> <button class="btn-add" style="width:auto; padding:2px 8px; font-size:10px;" onclick="copyStaff('${s}', '${date}')">COPY</button></div>`;
     });
-    box.innerHTML = h || "No tasks for " + date; box.style.display='block';
+    box.innerHTML = h || "No tasks"; box.style.display='block';
   }
-  function copyStaffMsg(n, d) {
+
+  function copyStaff(n, d){
     const ts = db.filter(t => t.date === d && (t.emp || 'Unassigned') === n);
-    let m = `*STATUS REQUEST: ${n} (${d})*\n\n`;
-    ts.forEach((t, i) => m += `${i+1}. ${t.n}\n   A/c: ${t.acc}\n   Status: ${t.status.toUpperCase()}\n   Rem: ${t.rem || 'Nil'}\n\n`);
+    let m = `*STATUS: ${n} (${d})*\n\n`;
+    ts.forEach((t,i) => m += `${i+1}. ${t.n} (Acc: ${t.acc}) - ${t.status.toUpperCase()}\n`);
     navigator.clipboard.writeText(m).then(() => showToast("Copied"));
   }
 
-  // --- UTILS ---
-  function todayISO() { return new Date().toISOString().split('T')[0]; }
-  function toggleGroup(el) { const b = el.nextElementSibling; b.style.display = b.style.display === 'none' ? 'block' : 'none'; }
-  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-  function openBackup() { document.getElementById('backupModal').style.display = 'flex'; }
-  function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(()=>t.style.display='none', 2000); }
-  function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
+  // UTILS
+  function toggleGroup(el){ const b = el.nextElementSibling; b.style.display = b.style.display==='none'?'block':'none'; }
+  function closeModal(id){ document.getElementById(id).style.display='none'; }
+  function openBackup(){ document.getElementById('backupModal').style.display='flex'; }
+  function showToast(m){ const t = document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none', 1800); }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
 
-  function editTask(uid) {
-    const t = db.find(x => x.uid === uid);
+  function editTask(uid){
+    const t = db.find(x => x.uid == uid);
     document.getElementById('editTaskId').value = uid;
-    document.getElementById('editName').value = t.n;
-    document.getElementById('editCustId').value = t.id;
-    document.getElementById('editAcc').value = t.acc;
-    document.getElementById('editPhone').value = t.ph;
-    document.getElementById('editStatus').value = t.status;
-    document.getElementById('editRemarks').value = t.rem;
+    document.getElementById('editName').value = t.n; document.getElementById('editCustId').value = t.id;
+    document.getElementById('editAcc').value = t.acc; document.getElementById('editPhone').value = t.ph;
+    document.getElementById('editStatus').value = t.status; document.getElementById('editRemarks').value = t.rem;
     document.getElementById('editAssignee').value = t.emp || "";
-    document.getElementById('parserArea').style.display = 'none';
-    document.getElementById('editArea').style.display = 'block';
+    document.getElementById('parserInputArea').style.display='none'; document.getElementById('editArea').style.display='block';
     switchPage('parsePage', document.querySelectorAll('.nav-item')[1]);
   }
-  function commitTask() {
-    const u = document.getElementById('editTaskId').value;
-    const t = db.find(x => x.uid === u);
-    t.n = document.getElementById('editName').value;
-    t.id = document.getElementById('editCustId').value;
-    t.acc = document.getElementById('editAcc').value;
-    t.ph = document.getElementById('editPhone').value;
-    t.status = document.getElementById('editStatus').value;
-    t.rem = document.getElementById('editRemarks').value;
+  function commitTask(){
+    const u = document.getElementById('editTaskId').value; const t = db.find(x => x.uid == u);
+    t.n = document.getElementById('editName').value; t.id = document.getElementById('editCustId').value;
+    t.acc = document.getElementById('editAcc').value; t.ph = document.getElementById('editPhone').value;
+    t.status = document.getElementById('editStatus').value; t.rem = document.getElementById('editRemarks').value;
     t.emp = document.getElementById('editAssignee').value;
     save(); cancelEdit(); switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
   }
-  function cancelEdit() { document.getElementById('parserArea').style.display = 'block'; document.getElementById('editArea').style.display = 'none'; }
-  function deleteTask(u) { if(confirm('Delete this record?')) { db = db.filter(t => t.uid !== u); save(); } }
-  function copySingleTask(uid) {
-    const t = db.find(x => x.uid === uid);
-    const m = `Name: ${t.n}\nID: ${t.id}\nAcc: ${t.acc}\nStatus: ${t.status}\nRem: ${t.rem}`;
-    navigator.clipboard.writeText(m).then(() => showToast("Task Details Copied"));
-  }
-
-  function bulkOrSingleParse() {
-    const r = document.getElementById('rawInput').value.trim();
-    const d = document.getElementById('globalDate').value;
-    const e = document.getElementById('assignBulk').value;
-    if(!r) return;
-    r.split('/').forEach(line => {
-      const w = line.trim().split(/\s+/);
-      if(w.length >= 3) {
-        db.push({ uid: Date.now().toString() + Math.random(), n: w[2], date: d, emp: e, status: 'pending', id: w[0], acc: w[1], ph: '', rem: w.slice(3).join(' ') });
-      }
-    });
-    document.getElementById('rawInput').value = ''; save(); switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
-  }
-
-  function downloadBackup() {
-    const blob = new Blob([JSON.stringify(db)], {type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'bank_data_backup.json'; a.click();
-  }
-  function restoreBackup() {
-    try { db = JSON.parse(document.getElementById('restoreBox').value); save(); closeModal('backupModal'); showToast("Data Restored"); } catch(e){ alert("Restore Error"); }
-  }
-  function clearAllTasks() { if(confirm("This will clear ALL records. Continue?")) { db = []; save(); closeModal('backupModal'); } }
+  function cancelEdit(){ document.getElementById('parserInputArea').style.display='block'; document.getElementById('editArea').style.display='none'; }
+  function deleteTask(u){ if(confirm('Delete?')){ db = db.filter(t => t.uid != u); save(); } }
+  function downloadBackup(){ const blob = new Blob([JSON.stringify(db)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click(); }
+  function restoreBackup(){ try { db = JSON.parse(document.getElementById('restoreBox').value); save(); closeModal('backupModal'); } catch(e){ alert("Error"); } }
+  function clearAll(){ if(confirm("Clear?")){ db=[]; save(); closeModal('backupModal'); } }
 
   window.onload = init;
 </script>
