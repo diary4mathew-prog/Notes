@@ -172,12 +172,12 @@
   <div id="toast" class="toast"></div>
 
 <script>
-  let db = JSON.parse(localStorage.getItem('bank_pro_v34_db')) || [];
-  let staff = JSON.parse(localStorage.getItem('bank_pro_v34_staff')) || [];
+  let db = JSON.parse(localStorage.getItem('bank_pro_v35_db')) || [];
+  let staff = JSON.parse(localStorage.getItem('bank_pro_v35_staff')) || [];
 
   function save(){
-    localStorage.setItem('bank_pro_v34_db', JSON.stringify(db));
-    localStorage.setItem('bank_pro_v34_staff', JSON.stringify(staff));
+    localStorage.setItem('bank_pro_v35_db', JSON.stringify(db));
+    localStorage.setItem('bank_pro_v35_staff', JSON.stringify(staff));
     updateStaffDropdowns();
     renderTasks();
     renderStaffList();
@@ -331,7 +331,7 @@
     dates.forEach(d => {
       body += `DATE: ${d}\n----------------\n`;
       grouped[d].forEach((t, i) => {
-        body += `${i+1}. [${t.status.toUpperCase()}] ${t.n}\n STAFF: ${t.emp || 'Unassigned'} | SOURCE: ${t.source || 'N/A'} (${t.time || 'N/A'})\n ID: ${t.id} | Acc: ${t.acc} | Ph: ${t.ph}\n Rem: ${t.rem || 'Nil'}\n\n`;
+        body += `${i+1}. [${t.status.toUpperCase()}] ${t.n}\n   STAFF: ${t.emp || 'Unassigned'} | SOURCE: ${t.source || 'N/A'} (${t.time || 'N/A'})\n   ID: ${t.id} | Acc: ${t.acc} | Ph: ${t.ph}\n   Rem: ${t.rem || 'Nil'}\n\n`;
       });
     });
     window.location.href = `mailto:?subject=Branch Data&body=${encodeURIComponent(body)}`;
@@ -350,10 +350,13 @@
     box.innerHTML = h || "No tasks"; box.style.display='block';
   }
 
+  // ========= UPDATED EMPLOYEE WISE SUMMARY (COPY MSG) =========
   function copyStaff(n, d){
     const ts = db.filter(t => t.date === d && (t.emp || 'Unassigned') === n);
-    let m = `*STATUS: ${n} (${d})*\n\n`;
-    ts.forEach((t,i) => m += `${i+1}. ${t.n} (Acc: ${t.acc}) - ${t.status.toUpperCase()} [via ${t.source}]\n`);
+    let m = `*STATUS REQUEST: ${n} (${d})*\n\n`;
+    ts.forEach((t, i) => {
+      m += `${i+1}. ID: ${t.id}\n   Account Number : ${t.acc}\n   Name : ${t.n}\n   remarks : ${t.rem || 'Nil'}\n   Status: ${t.status.toUpperCase()}\n\n`;
+    });
     navigator.clipboard.writeText(m).then(() => showToast("Copied"));
   }
 
@@ -389,7 +392,7 @@
   function cancelEdit(){ document.getElementById('parserInputArea').style.display='block'; document.getElementById('editArea').style.display='none'; }
   function deleteTask(u){ if(confirm('Delete?')){ db = db.filter(t => t.uid != u); save(); } }
   function downloadBackup(){ const blob = new Blob([JSON.stringify(db)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click(); }
-  function restoreBackup(){ try { db = JSON.parse(document.getElementById('restoreBox').value); save(); closeModal('backupModal'); showToast("Restored"); } catch(e){ alert("Error"); } }
+  function restoreBackup(){ try { db = JSON.parse(document.getElementById('restoreBox').value); save(); closeModal('backupModal'); showToast("Restored"); } catch(e){ alert("Restore Error"); } }
   function clearAll(){ if(confirm("Clear?")){ db=[]; save(); closeModal('backupModal'); } }
 
   window.onload = init;
