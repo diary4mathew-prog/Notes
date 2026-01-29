@@ -3,64 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Bank Manager Pro + Team</title>
+  <title>Bank Manager Pro - Team Edition</title>
   <style>
     :root { --bank-blue:#003366; --bg:#f0f2f5; --muted:#6c757d; --ok:#27ae60; --warn:#3498db; --violet:#9b59b6; --danger:#d63031; }
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    body { font-family:-apple-system, system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); margin:0; padding-bottom:200px; color:#111; }
+    body { font-family:-apple-system, system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); margin:0; padding-bottom:180px; color:#111; }
 
-    .bottom-nav{
+    /* Bottom Navigation */
+    .bottom-nav {
       position:fixed; bottom:20px; left:5%; width:90%; background:#fff; display:flex; 
       border-radius:15px; height:60px; z-index:1000; box-shadow:0 4px 15px rgba(0,0,0,0.2);
       border:1px solid #ddd; overflow:hidden;
     }
     .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10px; color:#888; border:none; background:none; font-weight:900; }
     .nav-item.active { color: var(--bank-blue); background: #f8f9fa; }
-    .nav-item i { font-style: normal; font-size: 18px; margin-bottom: 2px; }
+    .nav-item i { font-style: normal; font-size: 20px; margin-bottom: 2px; }
 
-    .page { display:none; padding:8px; animation: fadeIn 0.2s; }
+    /* Page Layout */
+    .page { display:none; padding:10px; animation: fadeIn 0.2s ease; }
     .page.active { display:block; }
     @keyframes fadeIn { from {opacity:0} to {opacity:1} }
 
-    .card { background:#fff; border-radius:12px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:8px; border:1px solid #e9ecef; }
-    .input-box { width:100%; border:1px solid #ccc; border-radius:8px; padding:9px; font-size:14px; margin-bottom:6px; outline:none; background:#fff; }
+    /* Cards & Inputs */
+    .card { background:#fff; border-radius:12px; padding:12px; box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:10px; border:1px solid #e9ecef; }
+    .input-box { width:100%; border:1px solid #ccc; border-radius:8px; padding:10px; font-size:14px; margin-bottom:8px; outline:none; background:#fff; }
+    .input-box:focus { border-color: var(--warn); }
     
     .btn-add { background:var(--bank-blue); color:#fff; border:none; border-radius:10px; padding:12px; font-weight:900; width:100%; cursor:pointer; }
-    .btn-ghost{ background:#eef2f7; color:#102a43; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; }
-    .btn-danger{ background:var(--danger); color:#fff; border:none; border-radius:10px; padding:8px; font-weight:900; }
+    .btn-ghost{ background:#eef2f7; color:#102a43; border:none; border-radius:10px; padding:10px; font-weight:900; width:100%; margin-top:5px; }
+    .btn-action{ background:#495057; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:11px; font-weight:bold; }
+    .btn-danger { background:var(--danger); color:white; border:none; border-radius:6px; padding:4px 8px; font-size:10px; }
 
-    /* Summary Section */
-    .summary-box { background:#fff; border:1px solid #3498db; border-radius:10px; padding:10px; margin-bottom:10px; display:none; }
-    .emp-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #eee; font-size:13px; }
-    .emp-row:last-child { border:0; }
+    /* Task & Summary Styling */
+    .summary-box { background:#fff; border:2px solid var(--warn); border-radius:10px; padding:12px; margin-bottom:15px; display:none; }
+    .emp-row { display:flex; flex-direction:column; padding:10px 0; border-bottom:1px solid #eee; }
+    .emp-stats { display:flex; justify-content:space-between; align-items:center; }
 
-    .date-header { background:#dee2e6; padding:10px; font-weight:900; border-radius:10px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
-    .task-item { border-left:5px solid #ccc; padding:10px; margin:6px 0; background:#fff; border-radius:10px; border:1px solid #eee; }
+    .date-header { background:#dee2e6; padding:12px; font-weight:900; border-radius:10px; margin:15px 0 5px 0; display:flex; justify-content:space-between; align-items:center; color: #333; }
+    .task-item { border-left:6px solid #ccc; padding:12px; margin:8px 0; background:#fff; border-radius:10px; border:1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .status-completed { border-left-color: var(--ok); }
     .status-processing { border-left-color: var(--warn); }
     .status-custpending { border-left-color: var(--violet); }
     
-    .assignee-tag { font-size:10px; background:#e1f5fe; color:#01579b; padding:2px 6px; border-radius:4px; font-weight:bold; }
-    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; z-index:2000; align-items:center; justify-content:center; padding:15px; }
-    .modal { background:#fff; width:100%; max-width:400px; padding:20px; border-radius:15px; }
-    .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:8px 16px; border-radius:20px; font-size:12px; display:none; z-index:3000; }
+    .assignee-tag { font-size:10px; background:#e1f5fe; color:#01579b; padding:3px 8px; border-radius:5px; font-weight:bold; text-transform: uppercase; }
+    .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:25px; font-size:13px; display:none; z-index:3000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+    h3 { margin: 0 0 10px 0; font-size: 16px; color: var(--bank-blue); }
   </style>
 </head>
 <body>
 
   <div id="taskPage" class="page active">
-    <div class="card" style="background:#e3f2fd; border-color:#3498db;">
-      <div style="display:flex; gap:5px;">
+    <div class="card" style="background:#fff9c4; border:1px solid #fbc02d;">
+      <div style="display:flex; gap:8px;">
         <input type="date" id="globalDate" class="input-box" style="flex:1" />
-        <select id="assignQuick" class="input-box" style="flex:1"><option value="">Assign to...</option></select>
+        <select id="assignQuick" class="input-box" style="flex:1"></select>
       </div>
-      <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name" />
-      <button class="btn-add" onclick="addManualTask()">+ QUICK ADD TASK</button>
+      <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name (Quick Add)" />
+      <button class="btn-add" onclick="addManualTask()">+ QUICK ADD TO LIST</button>
     </div>
 
     <div class="card">
-      <input id="searchBox" class="input-box" placeholder="Search tasks..." oninput="renderTasks()" />
-      <button class="btn-ghost" style="font-size:11px;" onclick="toggleSummary()">📊 View Employee-wise Summary</button>
+      <input id="searchBox" class="input-box" placeholder="Search by name, ID, or staff..." oninput="renderTasks()" />
+      <button class="btn-ghost" onclick="toggleSummary()">📊 TEAM SUMMARY & STATUS REQUESTS</button>
       <div id="dailySummary" class="summary-box"></div>
     </div>
 
@@ -69,45 +74,56 @@
 
   <div id="parsePage" class="page">
     <div class="card" id="parserInputArea">
-        <h3 style="margin:0 0 10px 0; color:var(--bank-blue)">Bulk Parse & Assign</h3>
-        <select id="assignBulk" class="input-box"><option value="">Default Assignee...</option></select>
-        <textarea id="rawInput" class="input-box" style="height:120px;" placeholder="ID Acc Name Phone Remarks / Next record..."></textarea>
-        <button class="btn-add" onclick="bulkOrSingleParse()">PROCESS ( / )</button>
+        <h3>Bulk Detail Entry</h3>
+        <select id="assignBulk" class="input-box"></select>
+        <textarea id="rawInput" class="input-box" style="height:150px;" placeholder="ID Acc Name Phone Remarks / Next record..."></textarea>
+        <button class="btn-add" onclick="bulkOrSingleParse()">PROCESS ENTRIES</button>
+        <div style="font-size:11px; color:gray; margin-top:8px;">Format: [ID] [ACC] [NAME] [PHONE] [REMARKS] separated by /</div>
     </div>
 
-    <div id="editArea" class="card" style="display:none; background:#fff;">
-      <h3 style="margin:0 0 10px 0; color:var(--bank-blue)">Edit Task</h3>
+    <div id="editArea" class="card" style="display:none;">
+      <h3>Edit Task Details</h3>
       <input type="hidden" id="editTaskId" />
+      <label style="font-size:11px; font-weight:bold;">ASSIGNED TO:</label>
       <select id="editAssignee" class="input-box"></select>
+      
       <input type="text" id="editName" class="input-box" placeholder="Customer Name" />
       <div style="display:flex; gap:5px;">
-        <input type="text" id="editCustId" class="input-box" placeholder="ID" />
-        <input type="text" id="editAcc" class="input-box" placeholder="Acc No" />
+        <input type="text" id="editCustId" class="input-box" placeholder="Customer ID" />
+        <input type="text" id="editAcc" class="input-box" placeholder="Account Number" />
       </div>
-      <input type="text" id="editPhone" class="input-box" placeholder="Phone" />
+      <input type="text" id="editPhone" class="input-box" placeholder="Phone Number" />
+      
+      <label style="font-size:11px; font-weight:bold;">WORK STATUS:</label>
       <select id="editStatus" class="input-box">
         <option value="pending">Pending</option>
         <option value="processing">Processing</option>
         <option value="custpending">Cust-Pending</option>
         <option value="completed">Completed</option>
       </select>
-      <textarea id="editRemarks" class="input-box" placeholder="Remarks..." style="height:80px;"></textarea>
-      <button class="btn-add" style="background:var(--ok)" onclick="commitTask()">SAVE CHANGES</button>
-      <button class="btn-ghost" style="margin-top:6px;" onclick="cancelEdit()">CANCEL</button>
+      
+      <textarea id="editRemarks" class="input-box" style="height:100px;" placeholder="Update remarks..."></textarea>
+      
+      <button class="btn-add" style="background:var(--ok)" onclick="commitTask()">SAVE ALL CHANGES</button>
+      <button class="btn-ghost" onclick="cancelEdit()">CANCEL</button>
     </div>
   </div>
 
   <div id="empPage" class="page">
     <div class="card">
-        <h3 style="margin:0 0 10px 0;">Employee Master</h3>
+        <h3>Employee Master List</h3>
         <div style="display:flex; gap:5px;">
-            <input type="text" id="newEmpName" class="input-box" placeholder="Staff Name" />
+            <input type="text" id="newEmpName" class="input-box" placeholder="Staff Full Name" />
             <button class="btn-add" style="width:80px" onclick="addEmployee()">ADD</button>
         </div>
     </div>
     <div id="employeeList"></div>
     <br>
-    <button class="btn-ghost" onclick="openBackup()">⬇︎ Backup / Restore Data</button>
+    <div class="card">
+        <h3>System Tools</h3>
+        <button class="btn-ghost" onclick="downloadBackup()">💾 DOWNLOAD FULL BACKUP (JSON)</button>
+        <button class="btn-ghost" style="color:red" onclick="clearData()">⚠️ CLEAR ALL DATA</button>
+    </div>
   </div>
 
   <nav class="bottom-nav">
@@ -116,24 +132,19 @@
     <button class="nav-item" onclick="switchPage('empPage', this)"><i>👥</i>STAFF</button>
   </nav>
 
-  <div id="backupModal" class="modal-backdrop" onclick="closeModal('backupModal')">
-    <div class="modal" onclick="event.stopPropagation()">
-      <h3>Data Management</h3>
-      <button class="btn-ghost" onclick="downloadBackup()">Download Backup</button>
-      <textarea id="restoreBox" class="input-box" style="height:100px; margin-top:10px;" placeholder="Paste JSON here..."></textarea>
-      <button class="btn-add" onclick="restoreBackup()">Restore</button>
-    </div>
-  </div>
-
   <div id="toast" class="toast"></div>
 
 <script>
-  let db = JSON.parse(localStorage.getItem('bank_tasks_v3')) || [];
-  let emps = JSON.parse(localStorage.getItem('bank_emps_v3')) || [];
+  // Storage keys
+  const DB_KEY = 'bank_tasks_v5';
+  const EMP_KEY = 'bank_emps_v5';
+
+  let db = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+  let emps = JSON.parse(localStorage.getItem(EMP_KEY)) || [];
 
   function save() {
-    localStorage.setItem('bank_tasks_v3', JSON.stringify(db));
-    localStorage.setItem('bank_emps_v3', JSON.stringify(emps));
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    localStorage.setItem(EMP_KEY, JSON.stringify(emps));
     updateDropdowns();
     renderTasks();
     renderEmployees();
@@ -146,51 +157,45 @@
     el.classList.add('active');
   }
 
-  // === EMPLOYEE LOGIC ===
+  // === STAFF MANAGEMENT ===
   function addEmployee() {
-    const name = document.getElementById('newEmpName').value.trim();
-    if (!name) return;
-    emps.push(name);
-    document.getElementById('newEmpName').value = '';
-    save();
-  }
-
-  function deleteEmployee(idx) {
-    if(confirm('Remove this employee?')) { emps.splice(idx,1); save(); }
-  }
-
-  function updateDropdowns() {
-    const selectors = ['assignQuick', 'assignBulk', 'editAssignee'];
-    selectors.forEach(id => {
-        const el = document.getElementById(id);
-        const val = el.value;
-        el.innerHTML = '<option value="">Unassigned</option>' + 
-            emps.map(e => `<option value="${e}">${e}</option>`).join('');
-        el.value = val;
-    });
+    const n = document.getElementById('newEmpName').value.trim();
+    if(n) { emps.push(n); document.getElementById('newEmpName').value=''; save(); showToast("Staff Added"); }
   }
 
   function renderEmployees() {
-    const cont = document.getElementById('employeeList');
-    cont.innerHTML = emps.map((e, i) => `
+    document.getElementById('employeeList').innerHTML = emps.map((e, i) => `
         <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <b>${e}</b>
-            <button class="btn-danger" onclick="deleteEmployee(${i})">DEL</button>
+            <b>👤 ${e}</b> 
+            <button class="btn-danger" onclick="deleteEmp(${i})">REMOVE</button>
         </div>
     `).join('');
   }
 
-  // === TASK LOGIC ===
+  function deleteEmp(i) { if(confirm('Remove this staff member?')) { emps.splice(i,1); save(); } }
+
+  function updateDropdowns() {
+    ['assignQuick', 'assignBulk', 'editAssignee'].forEach(id => {
+        const el = document.getElementById(id);
+        const val = el.value;
+        el.innerHTML = '<option value="">Unassigned</option>' + emps.map(e => `<option value="${e}">${e}</option>`).join('');
+        el.value = val;
+    });
+  }
+
+  // === TASK CORE LOGIC ===
   function addManualTask() {
     const name = document.getElementById('manualTitle').value.trim();
     const date = document.getElementById('globalDate').value;
     const emp = document.getElementById('assignQuick').value;
-    if(!name || !date) return alert("Select Date & Name");
+    if(!name || !date) return alert("Please select a date and enter a name.");
     db.push({ uid: Date.now(), date, n:name, emp, status:'pending', id:'M', acc:'M', ph:'', rem:'' });
     document.getElementById('manualTitle').value = '';
     save();
-    showToast("Task Added");
+    showToast("Task Created");
   }
+
+  // --- MASTER REPORT & SUMMARY (REQUESTED FEATURES) ---
 
   function toggleSummary() {
     const box = document.getElementById('dailySummary');
@@ -198,155 +203,224 @@
     
     const date = document.getElementById('globalDate').value;
     const tasks = db.filter(t => t.date === date);
-    
-    let html = `<b>Summary for ${date}</b><hr>`;
-    const summary = {};
-    
-    emps.forEach(e => summary[e] = { p:0, c:0 });
-    summary['Unassigned'] = { p:0, c:0 };
+    let html = `<h3>Team Productivity (${date})</h3><hr style="border:0; border-top:1px solid #eee;">`;
 
-    tasks.forEach(t => {
-        const key = t.emp || 'Unassigned';
-        if (!summary[key]) summary[key] = { p:0, c:0 };
-        if (t.status === 'completed') summary[key].c++;
-        else summary[key].p++;
-    });
+    const group = {};
+    const staffList = emps.concat(['Unassigned']);
+    staffList.forEach(e => group[e] = tasks.filter(t => (t.emp || 'Unassigned') === e));
 
-    Object.keys(summary).forEach(name => {
-        if(summary[name].p > 0 || summary[name].c > 0) {
-            html += `<div class="emp-row">
-                <span>${name}</span>
-                <span>⏳ ${summary[name].p} | ✅ ${summary[name].c}</span>
+    staffList.forEach(name => {
+        const tks = group[name];
+        if(tks.length > 0) {
+            const pending = tks.filter(t => t.status !== 'completed').length;
+            const done = tks.filter(t => t.status === 'completed').length;
+            html += `
+            <div class="emp-row">
+                <div class="emp-stats">
+                    <span><b>${name}</b> <br><small>⏳ ${pending} Pending | ✅ ${done} Done</small></span>
+                    <button class="btn-action" onclick="copyForEmployee('${name}', '${date}')">COPY STATUS REQ</button>
+                </div>
             </div>`;
         }
     });
-    box.innerHTML = html || "No tasks for this date";
+
+    if(tasks.length > 0) {
+        html += `<button class="btn-add" style="margin-top:15px; background:#2c3e50" onclick="emailDaySummary('${date}')">📧 SEND MASTER EMAIL (ALL DETAILS)</button>`;
+    } else {
+        html = "<h3>No tasks found for " + date + "</h3>";
+    }
+
+    box.innerHTML = html;
     box.style.display = 'block';
   }
+
+  function emailDaySummary(date) {
+    const tasks = db.filter(t => t.date === date);
+    const order = { pending: 0, processing: 1, custpending: 2, completed: 3 };
+    tasks.sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9) || String(a.n).localeCompare(String(b.n)));
+
+    let body = `--- BRANCH DATA BACKUP & REPORT: ${date} ---\n`;
+    body += `Generated: ${new Date().toLocaleString()}\n`;
+    body += `Total Record Count: ${tasks.length}\n`;
+    body += `==========================================\n\n`;
+
+    tasks.forEach((t, i) => {
+      body += `${i + 1}. [${(t.status || 'PENDING').toUpperCase()}] ${t.n || 'N/A'}\n`;
+      body += `   STAFF MAPPED : ${t.emp || 'UNASSIGNED'}\n`;
+      body += `   CUSTOMER ID  : ${t.id || ''}\n`;
+      body += `   ACCOUNT NO   : ${t.acc || ''}\n`;
+      body += `   PHONE/MOB    : ${t.ph || ''}\n`;
+      body += `   REMARKS      : ${t.rem || 'Nil'}\n`;
+      body += `------------------------------------------\n`;
+    });
+
+    body += `\nEnd of Report.`;
+
+    const subject = `Master Branch Report Details - ${date}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  function copyForEmployee(name, date) {
+    const tasks = db.filter(t => t.date === date && (t.emp || 'Unassigned') === name);
+    let text = `*WORK STATUS REQUEST: ${name.toUpperCase()}*\n`;
+    text += `Date: ${date}\n`;
+    text += `--------------------------\n`;
+
+    tasks.forEach((t, i) => {
+      text += `${i + 1}. ${t.n}\n`;
+      text += `   A/c: ${t.acc}\n`;
+      text += `   Status: ${t.status.toUpperCase()}\n`;
+      if(t.rem) text += `   Note: ${t.rem}\n`;
+      text += `\n`;
+    });
+
+    text += `Please provide the current situation of these items.`;
+    
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        showToast("Copied for " + name);
+    } catch (err) {
+        alert("Copy failed");
+    }
+    document.body.removeChild(textArea);
+  }
+
+  // --- RENDER & PARSER ---
 
   function renderTasks() {
     const cont = document.getElementById('taskContainer');
     const q = document.getElementById('searchBox').value.toLowerCase();
     cont.innerHTML = '';
-
     const grouped = {};
-    db.forEach(t => {
-        if (q && !JSON.stringify(t).toLowerCase().includes(q)) return;
-        (grouped[t.date] = grouped[t.date] || []).push(t);
+    
+    db.forEach(t => { 
+        if(!q || JSON.stringify(t).toLowerCase().includes(q)) {
+            (grouped[t.date] = grouped[t.date] || []).push(t);
+        }
     });
 
     Object.keys(grouped).sort().reverse().forEach(date => {
         const tasks = grouped[date];
-        cont.innerHTML += `
-            <div class="date-header">📅 ${date} <span>${tasks.length} Tasks</span></div>
-            <div>${tasks.map(t => `
-                <div class="task-item status-${t.status}">
-                    <div style="display:flex; justify-content:space-between;">
-                        <b style="font-size:14px;">${t.n}</b>
-                        ${t.emp ? `<span class="assignee-tag">👤 ${t.emp}</span>` : ''}
-                    </div>
-                    <div style="font-size:11px; color:#666; margin:4px 0;">ID: ${t.id} | Acc: ${t.acc}</div>
-                    <div style="font-size:12px; font-style:italic;">${t.rem}</div>
-                    <div style="display:flex; gap:10px; margin-top:8px;">
-                        <button onclick="editTask(${t.uid})" style="border:0; background:none;">✏️ Edit</button>
-                        <button onclick="deleteTask(${t.uid})" style="border:0; background:none; color:red;">🗑️ Delete</button>
-                        <button onclick="window.location.href='tel:${t.ph}'" style="border:0; background:none; color:blue;">📞 Call</button>
-                    </div>
+        cont.innerHTML += `<div class="date-header">📅 ${date} <span style="font-size:11px; opacity:0.7;">${tasks.length} records</span></div>` + 
+        tasks.map(t => `
+            <div class="task-item status-${t.status}">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <b style="font-size:15px; color:var(--bank-blue);">${t.n}</b> 
+                    <span class="assignee-tag">${t.emp || 'NONE'}</span>
                 </div>
-            `).join('')}</div>
-        `;
+                <div style="font-size:11px; color:#555; margin:5px 0;">ID: ${t.id} | A/c: ${t.acc}</div>
+                ${t.ph ? `<div style="font-size:11px; color:#555;">📞 ${t.ph}</div>` : ''}
+                <div style="font-size:12px; margin-top:8px; border-top:1px dotted #ccc; padding-top:5px;">${t.rem || '<span style="color:#ccc">No remarks</span>'}</div>
+                <div style="margin-top:12px; display:flex; gap:15px; font-size:12px; font-weight:bold; color:var(--warn);">
+                    <span onclick="editTask(${t.uid})">✏️ EDIT</span>
+                    <span onclick="deleteTask(${t.uid})" style="color:var(--danger)">🗑️ DELETE</span>
+                    ${t.ph ? `<span onclick="window.location.href='tel:${t.ph}'" style="color:var(--ok)">📞 CALL</span>` : ''}
+                </div>
+            </div>
+        `).join('');
     });
-  }
-
-  // (Standard Parser Logic Integrated with Assignee)
-  function parseLogic(text) {
-    const w = text.trim().split(/\s+/);
-    const id = w[0] || "N/A";
-    const acc = w[1] || "N/A";
-    let numStart = -1;
-    for (let i = 2; i < w.length; i++) { if (/^\d+$/.test(w[i])) { numStart = i; break; } }
-    if (numStart === -1) return { id, acc, n: w.slice(2).join(' '), ph: "", rem: "" };
-    const n = w.slice(2, numStart).join(' ');
-    let numEnd = numStart;
-    while (numEnd < w.length && /^\d+$/.test(w[numEnd])) numEnd++;
-    return { id, acc, n, ph: w.slice(numStart, numEnd).join(''), rem: w.slice(numEnd).join(' ') };
   }
 
   function bulkOrSingleParse() {
     const raw = document.getElementById('rawInput').value.trim();
     const date = document.getElementById('globalDate').value;
     const emp = document.getElementById('assignBulk').value;
-    if(!raw) return;
+    if(!raw || !date) return alert("Select Date first");
+    
     const records = raw.split('/');
     records.forEach(r => {
-        const p = parseLogic(r);
-        if(p.n) db.push({ uid: Date.now() + Math.random(), date, emp, status:'pending', ...p });
+        const w = r.trim().split(/\s+/);
+        if(w.length >= 2) {
+            // Logic: ID, Acc, Name, then rest is remarks
+            const id = w[0];
+            const acc = w[1];
+            const name = w[2] || "Unknown";
+            const rem = w.slice(3).join(' ');
+            db.push({ 
+                uid: Date.now() + Math.random(), 
+                date, 
+                emp, 
+                status:'pending', 
+                id, acc, n:name, ph:'', 
+                rem: rem 
+            });
+        }
     });
     document.getElementById('rawInput').value = '';
     save();
     switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
+    showToast("Bulk Data Processed");
   }
 
   function editTask(uid) {
     const t = db.find(x => x.uid == uid);
     document.getElementById('editTaskId').value = t.uid;
     document.getElementById('editName').value = t.n;
-    document.getElementById('editAssignee').value = t.emp || "";
     document.getElementById('editCustId').value = t.id;
     document.getElementById('editAcc').value = t.acc;
-    document.getElementById('editPhone').value = t.ph;
+    document.getElementById('editPhone').value = t.ph || "";
+    document.getElementById('editAssignee').value = t.emp || "";
     document.getElementById('editStatus').value = t.status;
     document.getElementById('editRemarks').value = t.rem;
-    document.getElementById('parserInputArea').style.display = 'none';
-    document.getElementById('editArea').style.display = 'block';
+    
+    document.getElementById('parserInputArea').style.display='none';
+    document.getElementById('editArea').style.display='block';
     switchPage('parsePage', document.querySelectorAll('.nav-item')[1]);
   }
 
   function commitTask() {
-    const uid = document.getElementById('editTaskId').value;
-    const index = db.findIndex(x => x.uid == uid);
-    db[index] = {
-        ...db[index],
-        n: document.getElementById('editName').value,
-        emp: document.getElementById('editAssignee').value,
-        id: document.getElementById('editCustId').value,
-        acc: document.getElementById('editAcc').value,
-        ph: document.getElementById('editPhone').value,
-        status: document.getElementById('editStatus').value,
-        rem: document.getElementById('editRemarks').value
-    };
-    save();
-    cancelEdit();
+    const idx = db.findIndex(x => x.uid == document.getElementById('editTaskId').value);
+    if(idx === -1) return;
+    
+    db[idx].n = document.getElementById('editName').value;
+    db[idx].id = document.getElementById('editCustId').value;
+    db[idx].acc = document.getElementById('editAcc').value;
+    db[idx].ph = document.getElementById('editPhone').value;
+    db[idx].emp = document.getElementById('editAssignee').value;
+    db[idx].status = document.getElementById('editStatus').value;
+    db[idx].rem = document.getElementById('editRemarks').value;
+    
+    save(); 
+    cancelEdit(); 
     switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
+    showToast("Record Updated");
   }
 
-  function deleteTask(uid) { if(confirm('Delete?')) { db = db.filter(x => x.uid != uid); save(); } }
-  function cancelEdit() { document.getElementById('parserInputArea').style.display = 'block'; document.getElementById('editArea').style.display = 'none'; }
-  function openBackup() { document.getElementById('backupModal').style.display = 'flex'; }
-  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-  function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display='none', 2000); }
+  function deleteTask(uid) { if(confirm('Permanently delete this record?')) { db = db.filter(x => x.uid != uid); save(); } }
+  
+  function cancelEdit() { 
+    document.getElementById('parserInputArea').style.display='block'; 
+    document.getElementById('editArea').style.display='none'; 
+  }
+
+  function showToast(m) { 
+    const t = document.getElementById('toast'); 
+    t.innerText = m; t.style.display = 'block'; 
+    setTimeout(() => t.style.display='none', 2000); 
+  }
+
   function downloadBackup() {
-    const data = JSON.stringify({tasks:db, emps: emps});
-    const blob = new Blob([data], {type: 'application/json'});
+    const blob = new Blob([JSON.stringify({tasks:db, staff:emps})], {type: 'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'bank_data.json';
+    a.download = `BranchBackup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
   }
-  function restoreBackup() {
-    try {
-        const data = JSON.parse(document.getElementById('restoreBox').value);
-        db = data.tasks || [];
-        emps = data.emps || [];
-        save();
-        closeModal('backupModal');
-        alert("Restored successfully");
-    } catch(e) { alert("Invalid Data"); }
+
+  function clearData() {
+    if(confirm("DANGER: This will delete ALL staff and ALL tasks forever. Proceed?")) {
+        db = []; emps = []; save();
+    }
   }
 
-  // Init
+  // Set Default Date
   document.getElementById('globalDate').value = new Date().toISOString().split('T')[0];
-  save();
+  save(); // Triggers initial render
 </script>
 </body>
 </html>
