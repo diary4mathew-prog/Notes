@@ -137,6 +137,7 @@
       height: 100%;
       background: var(--bg);
       z-index: 4000;
+      overflow-y: auto; /* FIXED: Added scroll */
       padding: 20px;
     }
     
@@ -145,6 +146,11 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      padding: 10px 0;
+      z-index: 10;
     }
     
     .calendar-nav {
@@ -177,8 +183,9 @@
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
+      gap: 6px;
       margin-bottom: 10px;
+      min-height: 300px; /* Ensure enough height */
     }
     
     .calendar-weekday {
@@ -199,6 +206,7 @@
       cursor: pointer;
       position: relative;
       padding: 5px;
+      min-height: 45px; /* Fixed minimum height */
     }
     
     .calendar-day.empty {
@@ -247,8 +255,13 @@
     
     .calendar-footer {
       margin-top: 20px;
+      padding-bottom: 30px; /* Extra padding at bottom */
       display: flex;
       gap: 10px;
+      position: sticky;
+      bottom: 0;
+      background: var(--bg);
+      padding-top: 10px;
     }
     
     .quick-date-btn {
@@ -261,6 +274,11 @@
       font-weight: bold;
       cursor: pointer;
       text-align: center;
+    }
+    
+    /* Ensure calendar content is scrollable */
+    .calendar-content {
+      padding-bottom: 100px; /* Space for footer */
     }
   </style>
 </head>
@@ -329,30 +347,32 @@
 
   <!-- CALENDAR MODAL -->
   <div id="calendarModal" class="calendar-modal">
-    <div class="calendar-header">
-      <button class="close-btn" onclick="closeCalendar()">×</button>
-      <div class="calendar-title" id="calendarMonthYear"></div>
-      <div class="calendar-nav">
-        <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">←</button>
-        <button class="calendar-nav-btn" onclick="changeCalendarMonth(1)">→</button>
+    <div class="calendar-content">
+      <div class="calendar-header">
+        <button class="close-btn" onclick="closeCalendar()">×</button>
+        <div class="calendar-title" id="calendarMonthYear"></div>
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">←</button>
+          <button class="calendar-nav-btn" onclick="changeCalendarMonth(1)">→</button>
+        </div>
       </div>
-    </div>
-    
-    <div class="calendar-grid">
-      <div class="calendar-weekday">Sun</div>
-      <div class="calendar-weekday">Mon</div>
-      <div class="calendar-weekday">Tue</div>
-      <div class="calendar-weekday">Wed</div>
-      <div class="calendar-weekday">Thu</div>
-      <div class="calendar-weekday">Fri</div>
-      <div class="calendar-weekday">Sat</div>
-      <div id="calendarDays"></div>
-    </div>
-    
-    <div class="calendar-footer">
-      <button class="quick-date-btn" onclick="selectToday()">Today</button>
-      <button class="quick-date-btn" onclick="selectYesterday()">Yesterday</button>
-      <button class="quick-date-btn" onclick="selectTomorrow()">Tomorrow</button>
+      
+      <div class="calendar-grid">
+        <div class="calendar-weekday">Sun</div>
+        <div class="calendar-weekday">Mon</div>
+        <div class="calendar-weekday">Tue</div>
+        <div class="calendar-weekday">Wed</div>
+        <div class="calendar-weekday">Thu</div>
+        <div class="calendar-weekday">Fri</div>
+        <div class="calendar-weekday">Sat</div>
+        <div id="calendarDays"></div>
+      </div>
+      
+      <div class="calendar-footer">
+        <button class="quick-date-btn" onclick="selectToday()">Today</button>
+        <button class="quick-date-btn" onclick="selectYesterday()">Yesterday</button>
+        <button class="quick-date-btn" onclick="selectTomorrow()">Tomorrow</button>
+      </div>
     </div>
   </div>
 
@@ -610,12 +630,10 @@
       const taskCount = db.filter(task => task.date === dateStr).length;
       const isToday = dateStr === todayStr;
       const isSelected = dateStr === currentViewDate;
-      const isOtherMonth = false; // Not needed for current month
       
       let dayClass = 'calendar-day';
       if (isToday) dayClass += ' today';
       if (isSelected) dayClass += ' selected';
-      if (isOtherMonth) dayClass += ' other-month';
       
       calendarHTML += `
         <div class="${dayClass}" onclick="selectDateFromCalendar('${dateStr}')">
@@ -625,7 +643,28 @@
       `;
     }
     
+    // Fill remaining empty cells to complete the grid (6 rows x 7 columns = 42 cells)
+    const totalCells = 42; // 6 weeks * 7 days
+    const cellsUsed = startingDay + daysInMonth;
+    const emptyCellsNeeded = totalCells - cellsUsed;
+    
+    for (let i = 0; i < emptyCellsNeeded; i++) {
+      calendarHTML += `<div class="calendar-day empty"></div>`;
+    }
+    
     document.getElementById('calendarDays').innerHTML = calendarHTML;
+    
+    // Scroll to the selected day if it's in the current month
+    const selectedDate = new Date(currentViewDate);
+    if (selectedDate.getMonth() === calendarCurrentMonth && 
+        selectedDate.getFullYear() === calendarCurrentYear) {
+      setTimeout(() => {
+        const selectedElement = document.querySelector('.calendar-day.selected');
+        if (selectedElement) {
+          selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
   }
   
   function selectDateFromCalendar(dateStr) {
