@@ -49,12 +49,264 @@
     .source-tag { background:#e2e8f0; color:#475569; font-size:9px; padding:2px 5px; border-radius:4px; margin-bottom:4px; display:inline-block; font-weight:bold; margin-left:5px; }
     .summary-box { background:#e1f5fe; border:1px solid #3498db; border-radius:10px; padding:10px; margin-bottom:10px; display:none; }
     .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:165px; background:#111; color:#fff; padding:10px 12px; border-radius:12px; font-size:12px; display:none; z-index:3000; }
+    
+    /* NEW STYLES */
+    .quick-add-btn { 
+      width: 100%; 
+      background: var(--bank-blue); 
+      color: #fff; 
+      border: none; 
+      border-radius: 12px; 
+      padding: 15px; 
+      font-size: 16px; 
+      font-weight: 900; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    
+    .fullscreen-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      z-index: 3000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .fullscreen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #ddd;
+    }
+    
+    .close-btn {
+      background: #ddd;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .current-date-header {
+      background: var(--bank-blue);
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .date-calendar-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    
+    /* CALENDAR STYLES */
+    .calendar-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      z-index: 4000;
+      padding: 20px;
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .calendar-nav {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .calendar-nav-btn {
+      background: var(--bank-blue);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .calendar-title {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      flex: 1;
+    }
+    
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .calendar-weekday {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+      color: #666;
+      padding: 8px 0;
+    }
+    
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      padding: 5px;
+    }
+    
+    .calendar-day.empty {
+      background: transparent;
+      cursor: default;
+    }
+    
+    .calendar-day.today {
+      background: #e3f2fd;
+      border: 2px solid var(--bank-blue);
+    }
+    
+    .calendar-day.selected {
+      background: var(--bank-blue);
+      color: white;
+    }
+    
+    .calendar-day.other-month {
+      color: #ccc;
+    }
+    
+    .day-number {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    
+    .day-task-count {
+      font-size: 10px;
+      background: rgba(0, 51, 102, 0.1);
+      color: var(--bank-blue);
+      border-radius: 4px;
+      padding: 1px 4px;
+      min-width: 16px;
+      text-align: center;
+    }
+    
+    .calendar-day.selected .day-task-count {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+    }
+    
+    .calendar-day.today .day-task-count {
+      background: rgba(0, 51, 102, 0.2);
+    }
+    
+    .calendar-footer {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .quick-date-btn {
+      flex: 1;
+      background: #f0f2f5;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
   <div id="taskPage" class="page active">
-    <div class="card" style="background:#fff9c4; border:1px solid #fbc02d;">
+    <!-- SIMPLIFIED QUICK ADD BUTTON -->
+    <div class="card" style="padding: 8px;">
+      <button class="quick-add-btn" onclick="openFullscreenAdd()">
+        <span>➕</span> QUICK ADD TASK
+      </button>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-ghost" style="font-size:11px;" onclick="toggleSummary()">📊 TEAM SUMMARY</button>
+        <button class="btn-ghost" style="font-size:11px;" onclick="openEmailReportModal()">📧 MASTER REPORT</button>
+      </div>
+      <div id="dailySummary" class="summary-box"></div>
+    </div>
+
+    <!-- CURRENT DATE HEADER WITH CALENDAR BUTTON -->
+    <div class="current-date-header">
+      <div>
+        <div style="font-size: 16px; font-weight: bold;" id="selectedDateTitle">📅 Today's Tasks</div>
+        <div style="font-size: 12px; opacity: 0.9;" id="dateStats"></div>
+      </div>
+      <button class="date-calendar-btn" onclick="openCalendar()">
+        <span>📅</span>
+        <span id="selectedDateDisplay"></span>
+      </button>
+    </div>
+
+    <!-- SEARCH BOX -->
+    <div class="card">
+      <input id="searchBox" class="input-box" placeholder="Search tasks..." oninput="renderTasks()" />
+    </div>
+
+    <div id="taskContainer"></div>
+  </div>
+
+  <!-- FULLSCREEN ADD MODAL -->
+  <div id="fullscreenAddModal" class="fullscreen-modal">
+    <div class="fullscreen-header">
+      <h2 style="margin: 0;">Add New Task</h2>
+      <button class="close-btn" onclick="closeFullscreenAdd()">×</button>
+    </div>
+    
+    <div class="card">
       <div style="display:flex; gap:6px;">
         <input type="date" id="globalDate" class="input-box" style="flex:1" />
         <select id="assignQuick" class="input-box" style="flex:1"></select>
@@ -69,21 +321,39 @@
       </div>
       <input type="text" id="manualTitle" class="input-box" placeholder="Customer Name" />
       <div style="display:flex; gap:6px;">
-        <button class="btn-add" onclick="addManualTask()">+ QUICK ADD</button>
+        <button class="btn-add" onclick="addManualTask()">+ ADD TASK</button>
         <button class="btn-ghost" onclick="openBackup()">⬇︎ Backup / Restore</button>
       </div>
     </div>
+  </div>
 
-    <div class="card">
-      <input id="searchBox" class="input-box" placeholder="Search..." oninput="renderTasks()" />
-      <div style="display:flex; gap:6px;">
-        <button class="btn-ghost" style="font-size:11px;" onclick="toggleSummary()">📊 TEAM SUMMARY</button>
-        <button class="btn-ghost" style="font-size:11px;" onclick="emailMasterReport()">📧 MASTER REPORT (EMAIL)</button>
+  <!-- CALENDAR MODAL -->
+  <div id="calendarModal" class="calendar-modal">
+    <div class="calendar-header">
+      <button class="close-btn" onclick="closeCalendar()">×</button>
+      <div class="calendar-title" id="calendarMonthYear"></div>
+      <div class="calendar-nav">
+        <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">←</button>
+        <button class="calendar-nav-btn" onclick="changeCalendarMonth(1)">→</button>
       </div>
-      <div id="dailySummary" class="summary-box"></div>
     </div>
-
-    <div id="taskContainer"></div>
+    
+    <div class="calendar-grid">
+      <div class="calendar-weekday">Sun</div>
+      <div class="calendar-weekday">Mon</div>
+      <div class="calendar-weekday">Tue</div>
+      <div class="calendar-weekday">Wed</div>
+      <div class="calendar-weekday">Thu</div>
+      <div class="calendar-weekday">Fri</div>
+      <div class="calendar-weekday">Sat</div>
+      <div id="calendarDays"></div>
+    </div>
+    
+    <div class="calendar-footer">
+      <button class="quick-date-btn" onclick="selectToday()">Today</button>
+      <button class="quick-date-btn" onclick="selectYesterday()">Yesterday</button>
+      <button class="quick-date-btn" onclick="selectTomorrow()">Tomorrow</button>
+    </div>
   </div>
 
   <div id="parsePage" class="page">
@@ -145,6 +415,24 @@
     <button class="nav-item" onclick="switchPage('staffPage', this)">👥 STAFF</button>
   </nav>
 
+  <!-- EMAIL REPORT MODAL -->
+  <div id="emailReportModal" class="modal-backdrop" onclick="closeModal('emailReportModal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3>Generate Email Report</h3>
+      <select id="reportType" class="input-box" onchange="toggleDatePickerForReport()">
+        <option value="daily">Daily Report (Specific Date)</option>
+        <option value="full">Full Backup (All Dates)</option>
+      </select>
+      <div id="reportDatePicker" style="margin-top: 10px;">
+        <input type="date" id="reportDate" class="input-box" value="" />
+      </div>
+      <div style="display:flex; gap:6px; margin-top:15px;">
+        <button class="btn-ghost" style="flex:1" onclick="closeModal('emailReportModal')">Cancel</button>
+        <button class="btn-add" style="flex:1" onclick="generateEmailReport()">Generate Email</button>
+      </div>
+    </div>
+  </div>
+
   <div id="moveModal" class="modal-backdrop" onclick="closeModal('moveModal')">
     <div class="modal" onclick="event.stopPropagation()">
       <h3>Move to Date</h3>
@@ -174,6 +462,9 @@
 <script>
   let db = JSON.parse(localStorage.getItem('bank_pro_v35_db')) || [];
   let staff = JSON.parse(localStorage.getItem('bank_pro_v35_staff')) || [];
+  let currentViewDate = new Date().toISOString().slice(0,10);
+  let calendarCurrentMonth = new Date().getMonth();
+  let calendarCurrentYear = new Date().getFullYear();
 
   function save(){
     localStorage.setItem('bank_pro_v35_db', JSON.stringify(db));
@@ -181,9 +472,9 @@
     updateStaffDropdowns();
     renderTasks();
     renderStaffList();
+    updateDateStats();
   }
 
-  // ========= YOUR ORIGINAL PARSER LOGIC (UNCHANGED) =========
   function parseLogic(text){
     const w = text.trim().split(/\s+/);
     const id = w[0] || ""; const acc = w[1] || "";
@@ -201,7 +492,47 @@
     const now = new Date();
     document.getElementById('globalDate').value = now.toISOString().slice(0,10);
     document.getElementById('timeQuick').value = now.toTimeString().slice(0,5);
+    document.getElementById('reportDate').value = now.toISOString().slice(0,10);
+    updateDateDisplay();
+    updateDateStats();
     save();
+  }
+
+  function formatDateDisplay(dateStr) {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    if (date.toDateString() === today.toDateString()) return "Today";
+    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+    if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+    
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  }
+
+  function updateDateDisplay() {
+    const display = document.getElementById('selectedDateDisplay');
+    const title = document.getElementById('selectedDateTitle');
+    const formatted = formatDateDisplay(currentViewDate);
+    
+    display.textContent = formatted;
+    
+    if (formatted === 'Today') {
+      title.textContent = "📅 Today's Tasks";
+    } else if (formatted === 'Yesterday') {
+      title.textContent = "📅 Yesterday's Tasks";
+    } else if (formatted === 'Tomorrow') {
+      title.textContent = "📅 Tomorrow's Tasks";
+    } else {
+      title.textContent = `📅 Tasks for ${formatted}`;
+    }
   }
 
   function switchPage(p, el){
@@ -211,7 +542,274 @@
     el.classList.add('active');
   }
 
-  // STAFF
+  // FULLSCREEN ADD MODAL FUNCTIONS
+  function openFullscreenAdd() {
+    document.getElementById('fullscreenAddModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeFullscreenAdd() {
+    document.getElementById('fullscreenAddModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+
+  // CALENDAR FUNCTIONS
+  function openCalendar() {
+    // Set calendar to current view date's month
+    const date = new Date(currentViewDate);
+    calendarCurrentMonth = date.getMonth();
+    calendarCurrentYear = date.getFullYear();
+    
+    document.getElementById('calendarModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    renderCalendar();
+  }
+  
+  function closeCalendar() {
+    document.getElementById('calendarModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+  
+  function changeCalendarMonth(delta) {
+    calendarCurrentMonth += delta;
+    if (calendarCurrentMonth < 0) {
+      calendarCurrentMonth = 11;
+      calendarCurrentYear--;
+    } else if (calendarCurrentMonth > 11) {
+      calendarCurrentMonth = 0;
+      calendarCurrentYear++;
+    }
+    renderCalendar();
+  }
+  
+  function renderCalendar() {
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+                       "July", "August", "September", "October", "November", "December"];
+    
+    document.getElementById('calendarMonthYear').textContent = 
+      `${monthNames[calendarCurrentMonth]} ${calendarCurrentYear}`;
+    
+    const firstDay = new Date(calendarCurrentYear, calendarCurrentMonth, 1);
+    const lastDay = new Date(calendarCurrentYear, calendarCurrentMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0,10);
+    
+    let calendarHTML = '';
+    
+    // Empty cells for days before the first day of the month
+    for (let i = 0; i < startingDay; i++) {
+      calendarHTML += `<div class="calendar-day empty"></div>`;
+    }
+    
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${calendarCurrentYear}-${String(calendarCurrentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const taskCount = db.filter(task => task.date === dateStr).length;
+      const isToday = dateStr === todayStr;
+      const isSelected = dateStr === currentViewDate;
+      const isOtherMonth = false; // Not needed for current month
+      
+      let dayClass = 'calendar-day';
+      if (isToday) dayClass += ' today';
+      if (isSelected) dayClass += ' selected';
+      if (isOtherMonth) dayClass += ' other-month';
+      
+      calendarHTML += `
+        <div class="${dayClass}" onclick="selectDateFromCalendar('${dateStr}')">
+          <div class="day-number">${day}</div>
+          ${taskCount > 0 ? `<div class="day-task-count">${taskCount}</div>` : ''}
+        </div>
+      `;
+    }
+    
+    document.getElementById('calendarDays').innerHTML = calendarHTML;
+  }
+  
+  function selectDateFromCalendar(dateStr) {
+    currentViewDate = dateStr;
+    updateDateDisplay();
+    updateDateStats();
+    renderTasks();
+    closeCalendar();
+  }
+  
+  function selectToday() {
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0,10);
+    selectDateFromCalendar(todayStr);
+    // Also update calendar to show current month
+    calendarCurrentMonth = today.getMonth();
+    calendarCurrentYear = today.getFullYear();
+  }
+  
+  function selectYesterday() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0,10);
+    selectDateFromCalendar(yesterdayStr);
+  }
+  
+  function selectTomorrow() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().slice(0,10);
+    selectDateFromCalendar(tomorrowStr);
+  }
+
+  // EMAIL REPORT FUNCTIONS
+  function openEmailReportModal() {
+    document.getElementById('emailReportModal').style.display = 'flex';
+  }
+  
+  function toggleDatePickerForReport() {
+    const reportType = document.getElementById('reportType').value;
+    const datePicker = document.getElementById('reportDatePicker');
+    datePicker.style.display = reportType === 'daily' ? 'block' : 'none';
+  }
+  
+  function generateEmailReport() {
+    const reportType = document.getElementById('reportType').value;
+    const selectedDate = document.getElementById('reportDate').value;
+    
+    let data;
+    let subject;
+    
+    if (reportType === 'daily') {
+      if (!selectedDate) {
+        alert("Please select a date");
+        return;
+      }
+      data = db.filter(t => t.date === selectedDate);
+      subject = `Daily Branch Report - ${selectedDate}`;
+    } else {
+      data = db;
+      subject = 'Full Branch Report Backup';
+    }
+    
+    if (data.length === 0) {
+      alert("No tasks found for the selected criteria");
+      closeModal('emailReportModal');
+      return;
+    }
+    
+    // Group by date
+    const grouped = {};
+    data.forEach(t => (grouped[t.date] ||= []).push(t));
+    const dates = Object.keys(grouped).sort().reverse();
+    
+    let body = `--- ${reportType === 'daily' ? 'DAILY' : 'FULL'} BRANCH REPORT ---\n\n`;
+    
+    dates.forEach(d => {
+      body += `DATE: ${d}\n${'='.repeat(30)}\n`;
+      grouped[d].forEach((t, i) => {
+        body += `${i+1}. [${t.status.toUpperCase()}] ${t.n}\n`;
+        body += `   STAFF: ${t.emp || 'Unassigned'} | SOURCE: ${t.source || 'N/A'} (${t.time || 'N/A'})\n`;
+        body += `   ID: ${t.id} | Acc: ${t.acc} | Ph: ${t.ph}\n`;
+        body += `   Rem: ${t.rem || 'Nil'}\n\n`;
+      });
+      body += '\n';
+    });
+    
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    closeModal('emailReportModal');
+  }
+
+  function updateDateStats() {
+    const tasks = db.filter(task => task.date === currentViewDate);
+    const stats = {
+      pending: tasks.filter(t => t.status === 'pending').length,
+      processing: tasks.filter(t => t.status === 'processing').length,
+      custpending: tasks.filter(t => t.status === 'custpending').length,
+      completed: tasks.filter(t => t.status === 'completed').length,
+      total: tasks.length
+    };
+    
+    document.getElementById('dateStats').innerHTML = `
+      Total: ${stats.total} • Pending: ${stats.pending} • Processing: ${stats.processing} • Completed: ${stats.completed}
+    `;
+  }
+
+  // TASK RENDERING (UPDATED TO SHOW ONLY SELECTED DATE)
+  function renderTasks(){
+    const cont = document.getElementById('taskContainer');
+    const q = document.getElementById('searchBox')?.value.toLowerCase() || '';
+    cont.innerHTML = "";
+    
+    const tasks = db.filter(t => t.date === currentViewDate);
+    const filteredTasks = q ? tasks.filter(t => JSON.stringify(t).toLowerCase().includes(q)) : tasks;
+    
+    if (filteredTasks.length === 0) {
+      cont.innerHTML = `
+        <div class="card" style="text-align: center; padding: 30px; color: #777;">
+          <div style="font-size: 18px; margin-bottom: 10px;">📭</div>
+          No tasks found for ${formatDateDisplay(currentViewDate)}<br>
+          <button class="btn-ghost" style="margin-top: 10px; width: auto;" onclick="openFullscreenAdd()">Add Task</button>
+        </div>
+      `;
+      return;
+    }
+    
+    // Group by status for better organization
+    const byStatus = {
+      pending: filteredTasks.filter(t => t.status === 'pending'),
+      processing: filteredTasks.filter(t => t.status === 'processing'),
+      custpending: filteredTasks.filter(t => t.status === 'custpending'),
+      completed: filteredTasks.filter(t => t.status === 'completed')
+    };
+    
+    let hasTasks = false;
+    
+    ['pending', 'processing', 'custpending', 'completed'].forEach(status => {
+      if (byStatus[status].length > 0) {
+        hasTasks = true;
+        const statusNames = {
+          pending: 'Pending',
+          processing: 'Processing',
+          custpending: 'Customer Pending',
+          completed: 'Completed'
+        };
+        
+        cont.innerHTML += `
+          <div class="date-header">
+            <div>${statusNames[status]} <span style="color: var(--muted); font-size: 11px;">(${byStatus[status].length})</span></div>
+          </div>
+        `;
+        
+        byStatus[status].forEach(t => {
+          cont.innerHTML += `
+            <div class="task-item status-${t.status}">
+              <div style="margin-bottom:5px;">
+                ${t.emp ? `<div class="staff-tag">👤 ${t.emp}</div>` : ''}
+                ${t.source ? `<div class="source-tag">📩 ${t.source} (${t.time || 'N/A'})</div>` : ''}
+              </div>
+              <div class="task-name">${escapeHtml(t.n)}</div>
+              <div class="task-meta">ID: ${t.id} | A/c: ${t.acc} | Ph: ${t.ph}</div>
+              ${t.rem ? `<div class="rem-text">${escapeHtml(t.rem)}</div>` : ''}
+              <div class="sym-btn-row">
+                <span onclick="editTask('${t.uid}')">✏️</span>
+                <span onclick="openMove('${t.uid}')">📅</span>
+                <span onclick="deleteTask('${t.uid}')" style="color:red">🗑️</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+    });
+    
+    if (!hasTasks) {
+      cont.innerHTML = `
+        <div class="card" style="text-align: center; padding: 30px; color: #777;">
+          <div style="font-size: 18px; margin-bottom: 10px;">📭</div>
+          No tasks found for ${formatDateDisplay(currentViewDate)}
+        </div>
+      `;
+    }
+  }
+
+  // STAFF FUNCTIONS
   function addStaff(){
     const n = document.getElementById('newStaffName').value.trim();
     if(n){ staff.push(n); document.getElementById('newStaffName').value=''; save(); }
@@ -239,7 +837,18 @@
     const e = document.getElementById('assignQuick').value;
     if(!n) return;
     db.push({ uid: Date.now().toString(), date: d, time: t, source: src, n, id:"M", acc:"M", ph:"", rem:"", status:"pending", emp:e });
-    document.getElementById('manualTitle').value = ""; save();
+    document.getElementById('manualTitle').value = ""; 
+    save();
+    closeFullscreenAdd();
+    if (d === currentViewDate) {
+      renderTasks();
+      updateDateStats();
+    }
+    // Update calendar if we're viewing that month
+    const taskDate = new Date(d);
+    if (taskDate.getMonth() === calendarCurrentMonth && taskDate.getFullYear() === calendarCurrentYear) {
+      renderCalendar();
+    }
   }
 
   function bulkOrSingleParse(){
@@ -256,91 +865,10 @@
     document.getElementById('rawInput').value = ""; save(); switchPage('taskPage', document.querySelectorAll('.nav-item')[0]);
   }
 
-  function renderTasks(){
-    const cont = document.getElementById('taskContainer');
-    const q = document.getElementById('searchBox').value.toLowerCase();
-    cont.innerHTML = "";
-    const grouped = {};
-    db.forEach(t => { if(!q || JSON.stringify(t).toLowerCase().includes(q)) (grouped[t.date] ||= []).push(t); });
-
-    Object.keys(grouped).sort().reverse().forEach(date => {
-      const tasks = grouped[date];
-      const stats = {p:0, pr:0, cp:0, d:0};
-      tasks.forEach(t => { if(t.status==='completed') stats.d++; else if(t.status==='processing') stats.pr++; else if(t.status==='custpending') stats.cp++; else stats.p++; });
-
-      cont.innerHTML += `
-        <div class="date-header" onclick="toggleGroup(this)">
-          <div>📅 ${date}<div class="date-sub">
-            <span class="pill"><span class="dot dot-p"></span><b>${stats.p}</b></span>
-            <span class="pill"><span class="dot dot-pr"></span><b>${stats.pr}</b></span>
-            <span class="pill"><span class="dot dot-cp"></span><b>${stats.cp}</b></span>
-            <span class="pill"><span class="dot dot-d"></span><b>${stats.d}</b></span>
-          </div></div>
-          <span class="badge" style="background:var(--bank-blue); color:white; padding:2px 8px; border-radius:10px; font-size:11px;">${tasks.length}</span>
-        </div>
-        <div class="group-body">
-          ${tasks.map(t => `
-            <div class="task-item status-${t.status}">
-              <div style="margin-bottom:5px;">
-                ${t.emp ? `<div class="staff-tag">👤 ${t.emp}</div>` : ''}
-                ${t.source ? `<div class="source-tag">📩 ${t.source} (${t.time || 'N/A'})</div>` : ''}
-              </div>
-              <div class="task-name">${escapeHtml(t.n)}</div>
-              <div class="task-meta">ID: ${t.id} | A/c: ${t.acc} | Ph: ${t.ph}</div>
-              ${t.rem ? `<div class="rem-text">${escapeHtml(t.rem)}</div>` : ''}
-              <div class="sym-btn-row">
-                <span onclick="editTask('${t.uid}')">✏️</span>
-                <span onclick="openMove('${t.uid}')">📅</span>
-                <span onclick="deleteTask('${t.uid}')" style="color:red">🗑️</span>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    });
-  }
-
-  // MOVE LOGIC
-  function openMove(uid){
-    const t = db.find(x => x.uid == uid);
-    document.getElementById('moveUid').value = uid;
-    document.getElementById('moveDate').value = t.date;
-    document.getElementById('moveModal').style.display='flex';
-  }
-  function confirmMove(){
-    const u = document.getElementById('moveUid').value;
-    const d = document.getElementById('moveDate').value;
-    const t = db.find(x => x.uid == u);
-    if(t) t.date = d;
-    save(); closeModal('moveModal'); showToast("Moved");
-  }
-
-  // MASTER EMAIL
-  function emailMasterReport(){
-    if (db.length === 0) return alert("No data.");
-    const selectedDate = document.getElementById('globalDate').value;
-    const single = confirm(`OK: Only ${selectedDate}\nCANCEL: Full Backup`);
-    const data = single ? db.filter(t => t.date === selectedDate) : db;
-    if(data.length === 0) return alert("No tasks.");
-
-    const grouped = {};
-    data.forEach(t => (grouped[t.date] ||= []).push(t));
-    const dates = Object.keys(grouped).sort().reverse();
-
-    let body = `--- ${single ? 'DAILY' : 'FULL'} BRANCH REPORT ---\n\n`;
-    dates.forEach(d => {
-      body += `DATE: ${d}\n----------------\n`;
-      grouped[d].forEach((t, i) => {
-        body += `${i+1}. [${t.status.toUpperCase()}] ${t.n}\n   STAFF: ${t.emp || 'Unassigned'} | SOURCE: ${t.source || 'N/A'} (${t.time || 'N/A'})\n   ID: ${t.id} | Acc: ${t.acc} | Ph: ${t.ph}\n   Rem: ${t.rem || 'Nil'}\n\n`;
-      });
-    });
-    window.location.href = `mailto:?subject=Branch Data&body=${encodeURIComponent(body)}`;
-  }
-
   function toggleSummary(){
     const box = document.getElementById('dailySummary');
     if(box.style.display==='block'){ box.style.display='none'; return; }
-    const date = document.getElementById('globalDate').value;
+    const date = currentViewDate;
     const tasks = db.filter(t => t.date === date);
     let h = `<b>Daily Status: ${date}</b><hr>`;
     staff.concat(['Unassigned']).forEach(s => {
@@ -350,7 +878,6 @@
     box.innerHTML = h || "No tasks"; box.style.display='block';
   }
 
-  // ========= UPDATED EMPLOYEE WISE SUMMARY (COPY MSG) =========
   function copyStaff(n, d){
     const ts = db.filter(t => t.date === d && (t.emp || 'Unassigned') === n);
     let m = `*STATUS REQUEST: ${n} (${d})*\n\n`;
@@ -361,7 +888,6 @@
   }
 
   // UTILS
-  function toggleGroup(el){ const b = el.nextElementSibling; b.style.display = b.style.display==='none'?'block':'none'; }
   function closeModal(id){ document.getElementById(id).style.display='none'; }
   function openBackup(){ document.getElementById('backupModal').style.display='flex'; }
   function showToast(m){ const t = document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none', 1800); }
@@ -391,6 +917,26 @@
   }
   function cancelEdit(){ document.getElementById('parserInputArea').style.display='block'; document.getElementById('editArea').style.display='none'; }
   function deleteTask(u){ if(confirm('Delete?')){ db = db.filter(t => t.uid != u); save(); } }
+  
+  function openMove(uid){
+    const t = db.find(x => x.uid == uid);
+    document.getElementById('moveUid').value = uid;
+    document.getElementById('moveDate').value = t.date;
+    document.getElementById('moveModal').style.display='flex';
+  }
+  function confirmMove(){
+    const u = document.getElementById('moveUid').value;
+    const d = document.getElementById('moveDate').value;
+    const t = db.find(x => x.uid == u);
+    if(t) t.date = d;
+    save(); closeModal('moveModal'); showToast("Moved");
+    // Update calendar if we're viewing that month
+    const taskDate = new Date(d);
+    if (taskDate.getMonth() === calendarCurrentMonth && taskDate.getFullYear() === calendarCurrentYear) {
+      renderCalendar();
+    }
+  }
+
   function downloadBackup(){ const blob = new Blob([JSON.stringify(db)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click(); }
   function restoreBackup(){ try { db = JSON.parse(document.getElementById('restoreBox').value); save(); closeModal('backupModal'); showToast("Restored"); } catch(e){ alert("Restore Error"); } }
   function clearAll(){ if(confirm("Clear?")){ db=[]; save(); closeModal('backupModal'); } }
