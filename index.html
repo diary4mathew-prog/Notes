@@ -127,7 +127,7 @@
       cursor: pointer;
     }
     
-    /* CALENDAR STYLES - FIXED HEIGHT */
+    /* CALENDAR STYLES - REDUCED SIZE */
     .calendar-modal {
       display: none;
       position: fixed;
@@ -137,19 +137,20 @@
       height: 100%;
       background: var(--bg);
       z-index: 4000;
-      padding: 20px;
+      padding: 10px;
     }
     
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      padding: 0 5px;
     }
     
     .calendar-nav {
       display: flex;
-      gap: 10px;
+      gap: 5px;
       align-items: center;
     }
     
@@ -158,9 +159,9 @@
       color: white;
       border: none;
       border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -168,25 +169,26 @@
     }
     
     .calendar-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       text-align: center;
       flex: 1;
+      padding: 0 5px;
     }
     
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
+      gap: 4px;
+      margin-bottom: 15px;
     }
     
     .calendar-weekday {
       text-align: center;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 11px;
       color: #666;
-      padding: 10px 0;
+      padding: 6px 0;
     }
     
     .calendar-day {
@@ -195,12 +197,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       position: relative;
-      padding: 8px 5px;
+      padding: 4px 2px;
       background: #fff;
       border: 1px solid #e9ecef;
+      font-size: 13px;
     }
     
     .calendar-day.empty {
@@ -226,18 +229,18 @@
     }
     
     .day-number {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     
     .day-task-count {
-      font-size: 11px;
+      font-size: 10px;
       background: #003366;
       color: white;
-      border-radius: 12px;
-      padding: 2px 8px;
-      min-width: 24px;
+      border-radius: 10px;
+      padding: 1px 6px;
+      min-width: 20px;
       text-align: center;
       font-weight: bold;
     }
@@ -252,9 +255,9 @@
     }
     
     .calendar-footer {
-      margin-top: 20px;
+      margin-top: 15px;
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
     
     .quick-date-btn {
@@ -262,8 +265,8 @@
       background: #f0f2f5;
       border: none;
       border-radius: 8px;
-      padding: 12px;
-      font-size: 14px;
+      padding: 10px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
@@ -271,9 +274,73 @@
     
     /* Make calendar content fit without scrolling */
     .calendar-content {
-      max-height: calc(100vh - 100px);
+      max-height: calc(100vh - 60px);
       display: flex;
       flex-direction: column;
+    }
+    
+    /* SMALLER CALENDAR MODAL */
+    #calendarModal .modal {
+      width: min(380px, 90%);
+      max-height: 85vh;
+      overflow: hidden;
+      padding: 12px;
+    }
+    
+    /* Adjust calendar grid for mobile */
+    @media (max-width: 400px) {
+      .calendar-grid {
+        gap: 3px;
+      }
+      
+      .calendar-day {
+        padding: 3px 1px;
+      }
+      
+      .day-number {
+        font-size: 13px;
+      }
+      
+      .day-task-count {
+        font-size: 9px;
+        padding: 1px 4px;
+        min-width: 18px;
+      }
+      
+      .calendar-title {
+        font-size: 15px;
+      }
+    }
+    
+    /* Extra small screens */
+    @media (max-width: 350px) {
+      .calendar-grid {
+        gap: 2px;
+      }
+      
+      .calendar-day {
+        padding: 2px 1px;
+      }
+      
+      .day-number {
+        font-size: 12px;
+      }
+      
+      .day-task-count {
+        font-size: 8px;
+        padding: 0px 3px;
+        min-width: 16px;
+      }
+      
+      .calendar-title {
+        font-size: 14px;
+      }
+      
+      .calendar-nav-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
@@ -340,12 +407,12 @@
     </div>
   </div>
 
-  <!-- CALENDAR MODAL - NOW AS A POPUP DIALOG, NOT FULLSCREEN -->
+  <!-- CALENDAR MODAL - REDUCED SIZE -->
   <div id="calendarModal" class="modal-backdrop" onclick="closeCalendar()">
-    <div class="modal" onclick="event.stopPropagation()" style="max-width: 500px; max-height: 80vh; overflow: hidden;">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 380px; max-height: 75vh; overflow: hidden; padding: 12px;">
       <div class="calendar-content">
         <div class="calendar-header">
-          <button class="close-btn" onclick="closeCalendar()">×</button>
+          <button class="close-btn" onclick="closeCalendar()" style="width: 32px; height: 32px; font-size: 18px;">×</button>
           <div class="calendar-title" id="calendarMonthYear"></div>
           <div class="calendar-nav">
             <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeCalendarMonth(-1)">←</button>
