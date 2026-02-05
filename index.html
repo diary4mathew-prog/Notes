@@ -127,7 +127,7 @@
       cursor: pointer;
     }
     
-    /* CALENDAR STYLES - REDUCED SIZE */
+    /* CALENDAR STYLES - FIXED WIDTH, NO HORIZONTAL SCROLL */
     .calendar-modal {
       display: none;
       position: fixed;
@@ -135,9 +135,11 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: var(--bg);
+      background: rgba(0,0,0,0.45);
       z-index: 4000;
-      padding: 10px;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
     }
     
     .calendar-header {
@@ -181,6 +183,8 @@
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
       margin-bottom: 15px;
+      width: 100%;
+      max-width: 350px;
     }
     
     .calendar-weekday {
@@ -188,7 +192,7 @@
       font-weight: bold;
       font-size: 11px;
       color: #666;
-      padding: 6px 0;
+      padding: 8px 0;
     }
     
     .calendar-day {
@@ -204,6 +208,8 @@
       background: #fff;
       border: 1px solid #e9ecef;
       font-size: 13px;
+      width: 100%;
+      max-width: 45px;
     }
     
     .calendar-day.empty {
@@ -258,6 +264,8 @@
       margin-top: 15px;
       display: flex;
       gap: 8px;
+      width: 100%;
+      max-width: 350px;
     }
     
     .quick-date-btn {
@@ -272,29 +280,120 @@
       text-align: center;
     }
     
-    /* Make calendar content fit without scrolling */
+    /* Make calendar content scrollable vertically only */
     .calendar-content {
-      max-height: calc(100vh - 60px);
+      max-height: 75vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 350px;
+      padding: 15px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    
+    /* Remove horizontal scroll from calendar */
+    .calendar-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .calendar-content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .calendar-content::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+    
+    .calendar-content::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+    
+    /* TASK GROUP COLLAPSIBLE */
+    .task-group-header {
+      background: #dee2e6;
+      padding: 8px 12px;
+      font-weight: 900;
+      border-radius: 10px;
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 6px;
+      border: 1px solid #cfd4da;
+      cursor: pointer;
+      transition: background 0.2s;
     }
     
-    /* SMALLER CALENDAR MODAL */
-    #calendarModal .modal {
-      width: min(380px, 90%);
-      max-height: 85vh;
+    .task-group-header:hover {
+      background: #d1d9e0;
+    }
+    
+    .task-group-header .toggle-icon {
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+    
+    .task-group-header.collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+    
+    .task-group-content {
       overflow: hidden;
-      padding: 12px;
+      transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+      opacity: 1;
     }
     
-    /* Adjust calendar grid for mobile */
+    .task-group-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+    
+    /* MONTH YEAR PICKER ENHANCEMENT */
+    .month-year-picker {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    
+    .month-picker, .year-picker {
+      background: #f0f2f5;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      min-width: 100px;
+    }
+    
+    /* TASK COUNT SUMMARY IN CALENDAR */
+    .calendar-summary {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      border: 1px solid #e9ecef;
+    }
+    
+    /* Adjust calendar for mobile */
     @media (max-width: 400px) {
       .calendar-grid {
         gap: 3px;
+        max-width: 320px;
       }
       
       .calendar-day {
         padding: 3px 1px;
+        max-width: 40px;
       }
       
       .day-number {
@@ -310,16 +409,27 @@
       .calendar-title {
         font-size: 15px;
       }
+      
+      .calendar-content {
+        max-width: 320px;
+        padding: 12px;
+      }
+      
+      .calendar-footer {
+        max-width: 320px;
+      }
     }
     
     /* Extra small screens */
     @media (max-width: 350px) {
       .calendar-grid {
         gap: 2px;
+        max-width: 300px;
       }
       
       .calendar-day {
         padding: 2px 1px;
+        max-width: 38px;
       }
       
       .day-number {
@@ -341,6 +451,20 @@
         height: 28px;
         font-size: 14px;
       }
+      
+      .calendar-content {
+        max-width: 300px;
+        padding: 10px;
+      }
+      
+      .calendar-footer {
+        max-width: 300px;
+      }
+    }
+    
+    /* Prevent body scroll when modal is open */
+    body.modal-open {
+      overflow: hidden;
     }
   </style>
 </head>
@@ -407,37 +531,59 @@
     </div>
   </div>
 
-  <!-- CALENDAR MODAL - REDUCED SIZE -->
-  <div id="calendarModal" class="modal-backdrop" onclick="closeCalendar()">
-    <div class="modal" onclick="event.stopPropagation()" style="max-width: 380px; max-height: 75vh; overflow: hidden; padding: 12px;">
-      <div class="calendar-content">
-        <div class="calendar-header">
-          <button class="close-btn" onclick="closeCalendar()" style="width: 32px; height: 32px; font-size: 18px;">×</button>
-          <div class="calendar-title" id="calendarMonthYear"></div>
-          <div class="calendar-nav">
-            <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeCalendarMonth(-1)">←</button>
-            <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeCalendarMonth(1)">→</button>
-          </div>
+  <!-- CALENDAR MODAL - FIXED WIDTH, NO HORIZONTAL SCROLL -->
+  <div id="calendarModal" class="calendar-modal" onclick="closeCalendar()">
+    <div class="calendar-content" onclick="event.stopPropagation()">
+      <div class="calendar-header">
+        <button class="close-btn" onclick="closeCalendar()" style="width: 32px; height: 32px; font-size: 18px;">×</button>
+        <div class="calendar-title" id="calendarMonthYear"></div>
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeCalendarMonth(-1)">←</button>
+          <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeCalendarMonth(1)">→</button>
         </div>
+      </div>
+      
+      <!-- MONTH/YEAR PICKER -->
+      <div class="month-year-picker">
+        <select class="month-picker" id="monthPicker" onchange="changeCalendarMonthBySelect()">
+          <option value="0">January</option>
+          <option value="1">February</option>
+          <option value="2">March</option>
+          <option value="3">April</option>
+          <option value="4">May</option>
+          <option value="5">June</option>
+          <option value="6">July</option>
+          <option value="7">August</option>
+          <option value="8">September</option>
+          <option value="9">October</option>
+          <option value="10">November</option>
+          <option value="11">December</option>
+        </select>
+        <select class="year-picker" id="yearPicker" onchange="changeCalendarYearBySelect()"></select>
+      </div>
+      
+      <div class="calendar-grid" id="calendarDaysGrid">
+        <!-- Weekdays -->
+        <div class="calendar-weekday">Sun</div>
+        <div class="calendar-weekday">Mon</div>
+        <div class="calendar-weekday">Tue</div>
+        <div class="calendar-weekday">Wed</div>
+        <div class="calendar-weekday">Thu</div>
+        <div class="calendar-weekday">Fri</div>
+        <div class="calendar-weekday">Sat</div>
         
-        <div class="calendar-grid" id="calendarDaysGrid">
-          <!-- Weekdays -->
-          <div class="calendar-weekday">Sun</div>
-          <div class="calendar-weekday">Mon</div>
-          <div class="calendar-weekday">Tue</div>
-          <div class="calendar-weekday">Wed</div>
-          <div class="calendar-weekday">Thu</div>
-          <div class="calendar-weekday">Fri</div>
-          <div class="calendar-weekday">Sat</div>
-          
-          <!-- Days will be inserted here by JavaScript -->
-        </div>
-        
-        <div class="calendar-footer">
-          <button class="quick-date-btn" onclick="event.stopPropagation(); selectToday()">Today</button>
-          <button class="quick-date-btn" onclick="event.stopPropagation(); selectYesterday()">Yesterday</button>
-          <button class="quick-date-btn" onclick="event.stopPropagation(); selectTomorrow()">Tomorrow</button>
-        </div>
+        <!-- Days will be inserted here by JavaScript -->
+      </div>
+      
+      <!-- TASK SUMMARY -->
+      <div class="calendar-summary" id="calendarSummary">
+        Total tasks this month: <span id="monthTaskCount">0</span>
+      </div>
+      
+      <div class="calendar-footer">
+        <button class="quick-date-btn" onclick="event.stopPropagation(); selectToday()">Today</button>
+        <button class="quick-date-btn" onclick="event.stopPropagation(); selectYesterday()">Yesterday</button>
+        <button class="quick-date-btn" onclick="event.stopPropagation(); selectTomorrow()">Tomorrow</button>
       </div>
     </div>
   </div>
@@ -551,10 +697,12 @@
   let currentViewDate = new Date().toISOString().slice(0,10);
   let calendarCurrentMonth = new Date().getMonth();
   let calendarCurrentYear = new Date().getFullYear();
+  let collapsedGroups = JSON.parse(localStorage.getItem('bank_pro_v35_collapsed')) || {};
 
   function save(){
     localStorage.setItem('bank_pro_v35_db', JSON.stringify(db));
     localStorage.setItem('bank_pro_v35_staff', JSON.stringify(staff));
+    localStorage.setItem('bank_pro_v35_collapsed', JSON.stringify(collapsedGroups));
     updateStaffDropdowns();
     renderTasks();
     renderStaffList();
@@ -581,7 +729,22 @@
     document.getElementById('reportDate').value = now.toISOString().slice(0,10);
     updateDateDisplay();
     updateDateStats();
+    populateYearPicker();
     save();
+  }
+
+  function populateYearPicker() {
+    const yearPicker = document.getElementById('yearPicker');
+    const currentYear = new Date().getFullYear();
+    let html = '';
+    
+    // Add years from current year -5 to current year +5
+    for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+      html += `<option value="${year}">${year}</option>`;
+    }
+    
+    yearPicker.innerHTML = html;
+    yearPicker.value = calendarCurrentYear;
   }
 
   function formatDateDisplay(dateStr) {
@@ -631,12 +794,12 @@
   // FULLSCREEN ADD MODAL FUNCTIONS
   function openFullscreenAdd() {
     document.getElementById('fullscreenAddModal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
   }
   
   function closeFullscreenAdd() {
     document.getElementById('fullscreenAddModal').style.display = 'none';
-    document.body.style.overflow = 'auto';
+    document.body.classList.remove('modal-open');
   }
 
   // CALENDAR FUNCTIONS
@@ -646,12 +809,18 @@
     calendarCurrentMonth = date.getMonth();
     calendarCurrentYear = date.getFullYear();
     
+    // Update selectors
+    document.getElementById('monthPicker').value = calendarCurrentMonth;
+    document.getElementById('yearPicker').value = calendarCurrentYear;
+    
     document.getElementById('calendarModal').style.display = 'flex';
+    document.body.classList.add('modal-open');
     renderCalendar();
   }
   
   function closeCalendar() {
     document.getElementById('calendarModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
   }
   
   function changeCalendarMonth(delta) {
@@ -663,7 +832,23 @@
       calendarCurrentMonth = 0;
       calendarCurrentYear++;
     }
+    updateMonthYearSelectors();
     renderCalendar();
+  }
+  
+  function changeCalendarMonthBySelect() {
+    calendarCurrentMonth = parseInt(document.getElementById('monthPicker').value);
+    renderCalendar();
+  }
+  
+  function changeCalendarYearBySelect() {
+    calendarCurrentYear = parseInt(document.getElementById('yearPicker').value);
+    renderCalendar();
+  }
+  
+  function updateMonthYearSelectors() {
+    document.getElementById('monthPicker').value = calendarCurrentMonth;
+    document.getElementById('yearPicker').value = calendarCurrentYear;
   }
   
   function renderCalendar() {
@@ -683,6 +868,21 @@
     
     let calendarHTML = '';
     
+    // Calculate tasks for this month for summary
+    let monthTaskCount = 0;
+    let taskCountsByDay = {};
+    
+    // Count tasks for each day in this month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${calendarCurrentYear}-${String(calendarCurrentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const taskCount = db.filter(task => task.date === dateStr).length;
+      taskCountsByDay[dateStr] = taskCount;
+      monthTaskCount += taskCount;
+    }
+    
+    // Update month summary
+    document.getElementById('monthTaskCount').textContent = monthTaskCount;
+    
     // Empty cells for days before the first day of the month
     for (let i = 0; i < startingDay; i++) {
       calendarHTML += `<div class="calendar-day empty"></div>`;
@@ -691,7 +891,7 @@
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${calendarCurrentYear}-${String(calendarCurrentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const taskCount = db.filter(task => task.date === dateStr).length;
+      const taskCount = taskCountsByDay[dateStr] || 0;
       const isToday = dateStr === todayStr;
       const isSelected = dateStr === currentViewDate;
       
@@ -726,6 +926,16 @@
       <div class="calendar-weekday">Sat</div>
       ${calendarHTML}
     `;
+    
+    // Adjust calendar height based on number of tasks in the current month
+    const calendarContent = document.querySelector('#calendarModal .calendar-content');
+    if (monthTaskCount > 30) {
+      calendarContent.style.maxHeight = '70vh';
+    } else if (monthTaskCount > 15) {
+      calendarContent.style.maxHeight = '65vh';
+    } else {
+      calendarContent.style.maxHeight = '60vh';
+    }
   }
   
   function selectDateFromCalendar(dateStr) {
@@ -743,6 +953,8 @@
     // Also update calendar to show current month
     calendarCurrentMonth = today.getMonth();
     calendarCurrentYear = today.getFullYear();
+    updateMonthYearSelectors();
+    renderCalendar();
   }
   
   function selectYesterday() {
@@ -762,6 +974,7 @@
   // EMAIL REPORT FUNCTIONS
   function openEmailReportModal() {
     document.getElementById('emailReportModal').style.display = 'flex';
+    document.body.classList.add('modal-open');
   }
   
   function toggleDatePickerForReport() {
@@ -832,7 +1045,7 @@
     `;
   }
 
-  // TASK RENDERING (UPDATED TO SHOW ONLY SELECTED DATE)
+  // TASK RENDERING WITH COLLAPSIBLE GROUPS
   function renderTasks(){
     const cont = document.getElementById('taskContainer');
     const q = document.getElementById('searchBox')?.value.toLowerCase() || '';
@@ -872,30 +1085,33 @@
           completed: 'Completed'
         };
         
+        const isCollapsed = collapsedGroups[status] || false;
+        const toggleIcon = isCollapsed ? '▶' : '▼';
+        
         cont.innerHTML += `
-          <div class="date-header">
+          <div class="task-group-header ${isCollapsed ? 'collapsed' : ''}" onclick="toggleTaskGroup('${status}')">
             <div>${statusNames[status]} <span style="color: var(--muted); font-size: 11px;">(${byStatus[status].length})</span></div>
+            <span class="toggle-icon">${toggleIcon}</span>
+          </div>
+          <div class="task-group-content ${isCollapsed ? 'collapsed' : ''}" id="group-${status}">
+            ${byStatus[status].map(t => `
+              <div class="task-item status-${t.status}">
+                <div style="margin-bottom:5px;">
+                  ${t.emp ? `<div class="staff-tag">👤 ${t.emp}</div>` : ''}
+                  ${t.source ? `<div class="source-tag">📩 ${t.source} (${t.time || 'N/A'})</div>` : ''}
+                </div>
+                <div class="task-name">${escapeHtml(t.n)}</div>
+                <div class="task-meta">ID: ${t.id} | A/c: ${t.acc} | Ph: ${t.ph}</div>
+                ${t.rem ? `<div class="rem-text">${escapeHtml(t.rem)}</div>` : ''}
+                <div class="sym-btn-row">
+                  <span onclick="editTask('${t.uid}')">✏️</span>
+                  <span onclick="openMove('${t.uid}')">📅</span>
+                  <span onclick="deleteTask('${t.uid}')" style="color:red">🗑️</span>
+                </div>
+              </div>
+            `).join('')}
           </div>
         `;
-        
-        byStatus[status].forEach(t => {
-          cont.innerHTML += `
-            <div class="task-item status-${t.status}">
-              <div style="margin-bottom:5px;">
-                ${t.emp ? `<div class="staff-tag">👤 ${t.emp}</div>` : ''}
-                ${t.source ? `<div class="source-tag">📩 ${t.source} (${t.time || 'N/A'})</div>` : ''}
-              </div>
-              <div class="task-name">${escapeHtml(t.n)}</div>
-              <div class="task-meta">ID: ${t.id} | A/c: ${t.acc} | Ph: ${t.ph}</div>
-              ${t.rem ? `<div class="rem-text">${escapeHtml(t.rem)}</div>` : ''}
-              <div class="sym-btn-row">
-                <span onclick="editTask('${t.uid}')">✏️</span>
-                <span onclick="openMove('${t.uid}')">📅</span>
-                <span onclick="deleteTask('${t.uid}')" style="color:red">🗑️</span>
-              </div>
-            </div>
-          `;
-        });
       }
     });
     
@@ -907,6 +1123,11 @@
         </div>
       `;
     }
+  }
+  
+  function toggleTaskGroup(status) {
+    collapsedGroups[status] = !collapsedGroups[status];
+    save();
   }
 
   // STAFF FUNCTIONS
@@ -988,8 +1209,16 @@
   }
 
   // UTILS
-  function closeModal(id){ document.getElementById(id).style.display='none'; }
-  function openBackup(){ document.getElementById('backupModal').style.display='flex'; }
+  function closeModal(id){ 
+    document.getElementById(id).style.display='none'; 
+    document.body.classList.remove('modal-open');
+  }
+  
+  function openBackup(){ 
+    document.getElementById('backupModal').style.display='flex'; 
+    document.body.classList.add('modal-open');
+  }
+  
   function showToast(m){ const t = document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none', 1800); }
   function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
 
@@ -1023,6 +1252,7 @@
     document.getElementById('moveUid').value = uid;
     document.getElementById('moveDate').value = t.date;
     document.getElementById('moveModal').style.display='flex';
+    document.body.classList.add('modal-open');
   }
   function confirmMove(){
     const u = document.getElementById('moveUid').value;
